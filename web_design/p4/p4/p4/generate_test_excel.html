@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成测试Excel</title>
+    <script src="lib/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>生成测试Excel文件</h1>
+    <button id="generateBtn">生成测试Excel</button>
+    
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            // 创建测试数据
+            const testData = [
+                ['任务名称', '成本类型', '预算成本', '实际成本', '完成百分比'],
+                ['钻前准备', '材料成本', 1000000, 950000, 100],
+                ['钻前准备', '人工成本', 500000, 480000, 100],
+                ['钻前准备', '设备成本', 2000000, 1900000, 100],
+                ['钻前准备', '服务成本', 300000, 280000, 100],
+                ['钻井工程', '材料成本', 5000000, 4800000, 90],
+                ['钻井工程', '人工成本', 3000000, 2900000, 90],
+                ['钻井工程', '设备成本', 8000000, 7600000, 90],
+                ['钻井工程', '服务成本', 1000000, 950000, 90],
+                ['完井工程', '材料成本', 3000000, 2700000, 80],
+                ['完井工程', '人工成本', 2000000, 1800000, 80],
+                ['完井工程', '设备成本', 4000000, 3600000, 80],
+                ['完井工程', '服务成本', 800000, 720000, 80]
+            ];
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(testData);
+            
+            // 添加工作表到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, '项目成本数据');
+            
+            // 下载Excel文件
+            XLSX.writeFile(wb, 'test_data.xlsx');
+        });
+    </script>
+</body>
+</html>

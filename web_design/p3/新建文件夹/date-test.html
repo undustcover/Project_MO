@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel日期格式测试</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Excel日期格式测试</h1>
+    
+    <div class="container">
+        <h2>Excel日期序列号转换测试</h2>
+        <p>测试Excel日期序列号转换为标准日期格式</p>
+        <button onclick="testDateConversion()">测试日期转换</button>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="container">
+        <h2>选择Excel文件</h2>
+        <p>选择一个Excel文件(xlsx或csv格式)，查看日期格式转换结果。</p>
+        <input type="file" id="file-input" accept=".xlsx,.csv">
+        <button onclick="analyzeFile()">分析文件</button>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+    
+    <div id="results" style="display: none;">
+        <div class="container">
+            <h2>日期转换结果</h2>
+            <div id="date-conversion"></div>
+        </div>
+    </div>
+
+    <script>
+        function testDateConversion() {
+            // 测试一些常见的Excel日期序列号
+            const testCases = [
+                { serial: 45962, expected: '2025-12-01' },
+                { serial: 45963, expected: '2025-12-02' },
+                { serial: 44197, expected: '2021-01-01' },
+                { serial: 43556, expected: '2019-03-15' }
+            ];
+            
+            let results = '<table><tr><th>Excel日期序列号</th><th>转换后的日期</th><th>预期日期</th><th>是否匹配</th></tr>';
+            
+            testCases.forEach(testCase => {
+                // Excel日期序列号转换为JavaScript日期
+                const excelDate = new Date((testCase.serial - 25569) * 86400 * 1000);
+                const year = excelDate.getFullYear();
+                const month = String(excelDate.getMonth() + 1).padStart(2, '0');
+                const day = String(excelDate.getDate()).padStart(2, '0');
+                const convertedDate = `${year}-${month}-${day}`;
+                
+                const isMatch = convertedDate === testCase.expected ? '✓' : '✗';
+                
+                results += `<tr>
+                    <td>${testCase.serial}</td>
+                    <td>${convertedDate}</td>
+                    <td>${testCase.expected}</td>
+                    <td>${isMatch}</td>
+                </tr>`;
+            });
+            
+            results += '</table>';
+            document.getElementById('test-results').innerHTML = results;
+        }
+        
+        function analyzeFile() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showMessage('请先选择一个文件');
+                return;
+            }
+            
+            const fileName = file.name.toLowerCase();
+            const isXlsx = fileName.endsWith('.xlsx');
+            const isCsv = fileName.endsWith('.csv');
+            
+            if (!isXlsx && !isCsv) {
+                showMessage('请选择.xlsx或.csv格式的文件');
+                return;
+            }
+            
+            if (isXlsx) {
+                // 处理xlsx文件
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // 显示第一个工作表的数据
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        displayDateConversion(jsonData);
+                        
+                    } catch (error) {
+                        showMessage('读取Excel文件失败: ' + error.message);
+                        console.error(error);
+                    }
+                };
+                
+                reader.readAsArrayBuffer(file);
+            } else {
+                // 处理CSV文件
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        
+                        // 将CSV转换为数组格式
+                        const jsonData = [];
+                        lines.forEach(line => {
+                            if (line.trim()) {
+                                const fields = parseCSVLine(line);
+                                jsonData.push(fields);
+                            }
+                        });
+                        
+                        displayDateConversion(jsonData);
+                        
+                    } catch (error) {
+                        showMessage('读取CSV文件失败: ' + error.message);
+                        console.error(error);
+                    }
+                };
+                
+                reader.readAsText(file, 'UTF-8');
+            }
+            
+            // 显示结果区域
+            document.getElementById('results').style.display = 'block';
+            showMessage('文件分析完成');
+        }
+        
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            // 添加最后一个字段
+            result.push(current.trim());
+            
+            return result;
+        }
+        
+        function displayDateConversion(jsonData) {
+            if (jsonData.length === 0) {
+                document.getElementById('date-conversion').innerHTML = '<p>文件中没有数据</p>';
+                return;
+            }
+            
+            // 创建表格
+            let table = '<table><tr><th>行号</th><th>原始日期值</th><th>转换后的日期</th></tr>';
+            
+            // 从第二行开始（跳过标题行）
+            for (let i = 1; i < Math.min(jsonData.length, 20); i++) { // 最多显示20行
+                const fields = jsonData[i];
+                
+                if (fields.length > 7) { // 确保有第8列
+                    let originalDate = fields[7];
+                    let convertedDate = '';
+                    
+                    if (typeof originalDate === 'number') {
+                        // Excel日期序列号转换为JavaScript日期
+                        const excelDate = new Date((originalDate - 25569) * 86400 * 1000);
+                        const year = excelDate.getFullYear();
+                        const month = String(excelDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(excelDate.getDate()).padStart(2, '0');
+                        convertedDate = `${year}-${month}-${day}`;
+                    } else if (typeof originalDate === 'string') {
+                        convertedDate = originalDate;
+                    }
+                    
+                    table += `<tr>
+                        <td>${i + 1}</td>
+                        <td>${originalDate}</td>
+                        <td>${convertedDate}</td>
+                    </tr>`;
+                }
+            }
+            
+            table += '</table>';
+            document.getElementById('date-conversion').innerHTML = table;
+        }
+        
+        function showMessage(msg) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试Excel导入</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>测试Excel导入功能</h1>
+    <button id="create-test-excel">创建测试Excel文件</button>
+    <p>点击上面的按钮创建一个测试Excel文件，然后在日历看板中导入它来测试功能。</p>
+    
+    <script>
+        document.getElementById('create-test-excel').addEventListener('click', function() {
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            
+            // 创建工作表数据
+            const wsData = [
+                ['工况名称', '工况一级时效', '工况二级时效', '工况三级时效', '开始时间', '结束时间', '负责人', '日期', '项目'],
+                // 当前月份的测试数据
+                ['进尺工作', '生产时效', '进尺工作时间', '纯钻时间', '08:00', '16:00', '张三', '2023-11-15', '项目1'],
+                ['固井工作', '生产时效', '固井工作时间', '', '16:00', '20:00', '李四', '2023-11-15', '项目1'],
+                ['组织停工', '非生产时效', '组织停工时间', '', '20:00', '24:00', '王五', '2023-11-15', '项目1'],
+                ['修理工作', '非生产时效', '修理时间', '', '00:00', '08:00', '赵六', '2023-11-16', '项目2'],
+                ['取芯工作', '生产时效', '进尺工作时间', '取芯时间', '09:00', '17:00', '钱七', '2023-11-16', '项目2'],
+                ['辅助工作', '生产时效', '辅助生产时间', '', '17:00', '24:00', '孙八', '2023-11-16', '项目2']
+            ];
+            
+            // 创建工作表
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // 设置列宽
+            ws['!cols'] = [
+                { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 },
+                { width: 10 }, { width: 10 }, { width: 10 }, { width: 15 }, { width: 10 }
+            ];
+            
+            // 添加工作表到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, '工况数据');
+            
+            // 导出文件
+            XLSX.writeFile(wb, '测试数据.xlsx');
+            
+            alert('测试Excel文件已创建并下载');
+        });
+    </script>
+</body>
+</html>

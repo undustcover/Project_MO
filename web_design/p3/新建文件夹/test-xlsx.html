@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成测试Excel文件</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>生成测试Excel文件</h1>
+    
+    <div class="container">
+        <h2>测试数据说明</h2>
+        <p>点击下方按钮生成包含测试数据的Excel文件，然后可以在日历看板系统中导入测试。</p>
+        <button onclick="generateTestFile()">生成测试Excel文件</button>
+        <button onclick="generateCSVFile()">生成测试CSV文件</button>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+    
+    <div class="container">
+        <h2>测试数据内容</h2>
+        <p>生成的测试文件将包含以下数据：</p>
+        <ul>
+            <li>7条不同工况的测试数据</li>
+            <li>包含生产时效和非生产时效</li>
+            <li>包含各种进尺工况详情</li>
+            <li>日期范围：2023年11月1日-7日</li>
+        </ul>
+    </div>
+
+    <script>
+        function generateTestFile() {
+            // 创建测试数据
+            const testData = [
+                ['日期', '项目名称', '开始时间', '结束时间', '工况类型', '工况详情', '进尺工况详情', '工作时长(小时)', '备注'],
+                ['2023-11-01', '项目1', '08:00', '12:00', '生产', '进尺', '纯钻', 4, '纯钻进尺工作'],
+                ['2023-11-01', '项目1', '13:00', '17:00', '生产', '进尺', '起下钻', 4, '起下钻作业'],
+                ['2023-11-02', '项目1', '08:00', '10:00', '生产', '进尺', '取芯', 2, '取芯作业'],
+                ['2023-11-02', '项目1', '10:00', '12:00', '生产', '进尺', '循环', 2, '循环作业'],
+                ['2023-11-03', '项目1', '08:00', '12:00', '生产', '固井', '固井准备', 4, '固井准备工作'],
+                ['2023-11-04', '项目1', '08:00', '12:00', '生产', '电测', '电测作业', 4, '电测作业'],
+                ['2023-11-05', '项目1', '08:00', '12:00', '非生产', '辅助', '设备维护', 4, '设备维护工作']
+            ];
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(testData);
+            
+            // 添加工作表到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, "日历数据");
+            
+            // 生成Excel文件并下载
+            XLSX.writeFile(wb, "测试数据.xlsx");
+            
+            showMessage('测试Excel文件已生成并下载！');
+        }
+        
+        function generateCSVFile() {
+            // 创建测试数据
+            const testData = [
+                ['日期', '项目名称', '开始时间', '结束时间', '工况类型', '工况详情', '进尺工况详情', '工作时长(小时)', '备注'],
+                ['2023-11-01', '项目1', '08:00', '12:00', '生产', '进尺', '纯钻', 4, '纯钻进尺工作'],
+                ['2023-11-01', '项目1', '13:00', '17:00', '生产', '进尺', '起下钻', 4, '起下钻作业'],
+                ['2023-11-02', '项目1', '08:00', '10:00', '生产', '进尺', '取芯', 2, '取芯作业'],
+                ['2023-11-02', '项目1', '10:00', '12:00', '生产', '进尺', '循环', 2, '循环作业'],
+                ['2023-11-03', '项目1', '08:00', '12:00', '生产', '固井', '固井准备', 4, '固井准备工作'],
+                ['2023-11-04', '项目1', '08:00', '12:00', '生产', '电测', '电测作业', 4, '电测作业'],
+                ['2023-11-05', '项目1', '08:00', '12:00', '非生产', '辅助', '设备维护', 4, '设备维护工作']
+            ];
+            
+            // 转换为CSV格式
+            let csvContent = "";
+            testData.forEach(row => {
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // 创建Blob并下载
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "测试数据.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('测试CSV文件已生成并下载！');
+        }
+        
+        function showMessage(msg) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
