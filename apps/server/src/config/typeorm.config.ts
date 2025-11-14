@@ -13,8 +13,9 @@ export const typeormConfig: DataSourceOptions = usePostgres
       synchronize: true
     }
   : {
-      type: 'sqlite',
-      database: __dirname + '/../../data/dev.sqlite',
+      type: 'sqljs',
+      location: __dirname + '/../../data/dev.sqlite',
+      autoSave: true,
       entities: [__dirname + '/../**/*.entity.{ts,js}'],
       synchronize: true
     }
