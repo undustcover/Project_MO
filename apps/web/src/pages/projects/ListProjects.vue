@@ -14,9 +14,10 @@
       <el-table-column prop="contractEnd" label="结束" width="120" />
       <el-table-column prop="workloadText" label="工作量" width="160" />
       <el-table-column prop="amountValue" label="合同金额" width="140" />
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="160">
         <template #default="scope">
-          <el-button text type="primary">查看</el-button>
+          <el-button text type="primary" @click="$router.push('/projects/' + scope.row.id)">查看</el-button>
+          <el-button text @click="$router.push('/progress')">进度</el-button>
         </template>
       </el-table-column>
     </el-table>

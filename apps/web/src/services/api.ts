@@ -14,3 +14,50 @@ export async function createProject(payload: any) {
   })
   return res.ok
 }
+
+export async function getProject(id: number) {
+  const res = await fetch(`${BASE_URL}/projects/` + id)
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function getProgressDashboard(params: { projectId: number; taskName?: string; from?: string; to?: string }) {
+  const u = new URL(`/api/dashboard/progress`, window.location.origin)
+  u.searchParams.set('projectId', String(params.projectId))
+  if (params.taskName) u.searchParams.set('taskName', params.taskName)
+  if (params.from) u.searchParams.set('from', params.from)
+  if (params.to) u.searchParams.set('to', params.to)
+  const res = await fetch(u.toString())
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function getProgressTasks(projectId: number) {
+  const u = new URL(`/api/dashboard/progress/tasks`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  const res = await fetch(u.toString())
+  if (!res.ok) return []
+  return res.json()
+}
+
+export async function getProgressTaskDetail(params: { projectId: number; taskName: string; from?: string; to?: string }) {
+  const u = new URL(`/api/dashboard/progress/taskDetail`, window.location.origin)
+  u.searchParams.set('projectId', String(params.projectId))
+  u.searchParams.set('taskName', params.taskName)
+  if (params.from) u.searchParams.set('from', params.from)
+  if (params.to) u.searchParams.set('to', params.to)
+  const res = await fetch(u.toString())
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function getProgressTaskBreakdown(params: { projectId: number; taskName: string; from?: string; to?: string }) {
+  const u = new URL(`/api/dashboard/progress/taskBreakdown`, window.location.origin)
+  u.searchParams.set('projectId', String(params.projectId))
+  u.searchParams.set('taskName', params.taskName)
+  if (params.from) u.searchParams.set('from', params.from)
+  if (params.to) u.searchParams.set('to', params.to)
+  const res = await fetch(u.toString())
+  if (!res.ok) return null
+  return res.json()
+}
