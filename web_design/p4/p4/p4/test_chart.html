@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart.js测试</title>
+    <script src="lib/chart.min.js"></script>
+    <script src="lib/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+    <h1>Chart.js测试</h1>
+    <canvas id="myChart" width="400" height="400"></canvas>
+    
+    <script>
+        console.log('Chart.js类型:', typeof Chart);
+        console.log('Chart对象:', Chart);
+        console.log('ChartDataLabels类型:', typeof ChartDataLabels);
+        
+        // 注册插件
+        if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+            console.log('ChartDataLabels插件已注册');
+        } else {
+            console.error('Chart.js或ChartDataLabels插件未正确加载');
+        }
+        
+        // 创建一个简单的雷达图
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['维度1', '维度2', '维度3', '维度4', '维度5', '维度6'],
+                datasets: [{
+                    label: '测试数据',
+                    data: [1, 2, 3, 4, 5, 3],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 5
+                    }
+                }
+            }
+        });
+        
+        console.log('图表创建完成:', myChart);
+    </script>
+</body>
+</html>

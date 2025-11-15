@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目成本可视化分析</title>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <script src="lib/chart.min.js"></script>
+    <script src="lib/chartjs-plugin-datalabels.min.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <header class="bg-primary text-white p-3 mb-4">
+            <h1 class="text-center">项目成本可视化分析</h1>
+        </header>
+
+       <!-- 项目信息看板 -->
+        <div class="project-info-board">
+            <h2 class="board-title">厄瓜多尔12和31区块PEC9口井钻完井一体化项目</h2>
+            <div class="info-cards-container">
+                <!-- 基本信息卡片 -->
+                <div class="info-card basic-info">
+                    <div class="card-header">
+                        <h3>基本信息</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">合同编号:</span>
+                            <span class="info-value">Nro. 2025246</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同周期:</span>
+                            <span class="info-value">2025.06.20～2026.06.19</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工作量:</span>
+                            <span class="info-value">9口井</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同金额:</span>
+                            <span class="info-value">$46,248,681.6</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 时间节点卡片 -->
+                <div class="info-card timeline-info">
+                    <div class="card-header">
+                        <h3>时间节点</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">开工日期:</span>
+                            <span class="info-value">2025/9/5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同验收合格日期:</span>
+                            <span class="info-value">2026/5/23</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">尾款到账日期:</span>
+                            <span class="info-value">2026/6/25</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">保函释放日期:</span>
+                            <span class="info-value">2026/7/29</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">总结复盘日期:</span>
+                            <span class="info-value">2026/6/27</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 参与单位卡片 -->
+                <div class="info-card participants-info">
+                    <div class="card-header">
+                        <h3>参与单位</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">运营主体:</span>
+                            <span class="info-value">国际工程公司</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">厄瓜多尔分公司：</span>
+                            <span class="info-value">后勤支持保障</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">CCDC-28队：</span>
+                            <span class="info-value">钻井主体</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">项目长:</span>
+                            <span class="info-value">曲学东</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"></span>
+                            <span class="info-value"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分包单位卡片 -->
+                <div class="info-card subcontractors-info">
+                    <div class="card-header">
+                        <h3>分包单位</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">当地租赁:</span>
+                            <span class="info-value">野营房、车辆</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当地购买:</span>
+                            <span class="info-value">灭火器</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当地分包:</span>
+                            <span class="info-value">安保、生活服务、重载运输、通讯</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <!-- 文件上传区域 -->
+            <section class="upload-section mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>数据导入</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="excelFile" class="form-label">请选择Excel文件：</label>
+                            <input type="file" class="form-control" id="excelFile" accept=".xlsx, .xls">
+                        </div>
+                        <button id="uploadBtn" class="btn btn-primary">上传并分析</button>
+                        <div id="uploadStatus" class="mt-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 数据概览卡片 -->
+            <section id="overviewCards" class="mb-4" style="display: none;">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">预算总成本 (BAC)</h5>
+                                <p class="card-text display-6" id="bacValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">任务总成本 (AC)</h5>
+                                <p class="card-text display-6" id="acValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">剩余预算</h5>
+                                <p class="card-text display-6" id="remainingBudget">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">最高成本项</h5>
+                                <p class="card-text" id="highestCostItem">-</p>
+                                <p class="card-text display-6" id="highestCostValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 新增指标卡片 -->
+                <div class="row mt-4">
+                    <div class="col-md-2">
+                        <div class="card text-white bg-secondary">
+                            <div class="card-body">
+                                <h5 class="card-title">总收入 (EV)</h5>
+                                <p class="card-text display-6" id="evValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card text-white bg-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">成本偏差</h5>
+                                <p class="card-text display-6" id="costVarianceValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2" id="cpiCard">
+                        <div class="card text-white bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">成本绩效指数 (CPI)</h5>
+                                <p class="card-text display-6" id="cpiValue">0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">完工尚需估算 (ETC)</h5>
+                                <p class="card-text display-6" id="etcValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">完工总估算 (EAC)</h5>
+                                <p class="card-text display-6" id="eacValue">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 图表区域 -->
+            <section id="chartsSection" style="display: none;">
+                <div class="row">
+                    <!-- 总成本条状图 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>总成本条状图</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="bar-chart-container">
+                                    <canvas id="totalCostBarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 预算消耗图 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>预算消耗图</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="bar-chart-container">
+                                    <canvas id="budgetConsumptionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 总成本圆盘图 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>总成本圆盘图（成本要素-2级占比）</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="pie-chart-container">
+                                    <canvas id="totalCostPieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 任务选择器 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>任务成本分析</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="taskSelector" class="form-label">选择任务：</label>
+                                    <select class="form-select" id="taskSelector">
+                                        <option value="">请先上传数据</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- 单任务指标看板 -->
+                                <div class="row mt-3" id="taskMetricsCards" style="display: none;">
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card text-white bg-info" id="taskCpiCard">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title mb-1">任务成本绩效指数</h6>
+                                                <p class="card-text mb-0" id="taskCpiValue">0.00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card text-white bg-warning">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title mb-1">任务成本偏差</h6>
+                                                <p class="card-text mb-0" id="taskCostVarianceValue">$0</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card text-white bg-success">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title mb-1">任务利润率</h6>
+                                                <p class="card-text mb-0" id="taskProfitMarginValue">0%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 单任务1级成本圆盘图 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 id="taskLevel1PieTitle">单任务1级成本圆盘图</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="pie-chart-container">
+                                    <canvas id="taskLevel1PieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 单任务2级直接成本圆盘图 -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 id="taskLevel2PieTitle">单任务2级直接成本圆盘图</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="pie-chart-container">
+                                    <canvas id="taskLevel2PieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 任务成本预算输入 -->
+                    <div class="col-12 mb-4">
+                        <div class="card budget-input-card">
+                            <div class="card-header">
+                                <h4>任务成本预算输入</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="laborBudgetInput" class="form-label">任务人员成本预算 (元)</label>
+                                        <input type="number" class="form-control" id="laborBudgetInput" placeholder="输入人员成本预算" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="materialBudgetInput" class="form-label">任务材料成本预算 (元)</label>
+                                        <input type="number" class="form-control" id="materialBudgetInput" placeholder="输入材料成本预算" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="equipmentBudgetInput" class="form-label">任务设备成本预算 (元)</label>
+                                        <input type="number" class="form-control" id="equipmentBudgetInput" placeholder="输入设备成本预算" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="serviceBudgetInput" class="form-label">任务服务成本预算 (元)</label>
+                                        <input type="number" class="form-control" id="serviceBudgetInput" placeholder="输入服务成本预算" min="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <button id="startAnalysisBtn" class="btn btn-primary btn-lg">开始分析</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 单任务成本六维雷达图 -->
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 id="taskRadarTitle">单任务成本六维雷达图</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- 雷达图容器 -->
+                                    <div class="col-lg-6 mb-4">
+                                        <div class="radar-chart-container">
+                                            <canvas id="taskRadarChart"></canvas>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 六维评分详情 -->
+                                    <div class="col-lg-6 mb-4">
+                                        <div class="dimension-scores">
+                                            <h5>六维评分详情</h5>
+                                            <div class="dimension-score-list">
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">材料成本控制率</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="materialScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">人工成本控制率</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="laborScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">设备成本控制率</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="equipmentScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">服务成本控制率</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="serviceScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">任务总成本控制率</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="totalCostScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                                <div class="dimension-score-item">
+                                                    <span class="dimension-name">间接成本占比</span>
+                                                    <div class="progress">
+                                                        <div class="progress-bar" id="indirectCostScoreBar" role="progressbar" style="width: 0%">0分</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 任务整体评价看板 -->
+                                <div class="task-evaluation-boards mt-4">
+                                    <h5>任务整体评价</h5>
+                                    <div class="row">
+                                        <!-- 综合得分看板 -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="evaluation-board score-board">
+                                                <div class="board-header">
+                                                    <h6>综合得分</h6>
+                                                </div>
+                                                <div class="board-content">
+                                                    <div class="score-display" id="overallScoreDisplay">0.00</div>
+                                                    <div class="score-label" id="overallScoreLabel">未评分</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 评价等级看板 -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="evaluation-board grade-board">
+                                                <div class="board-header">
+                                                    <h6>评价等级</h6>
+                                                </div>
+                                                <div class="board-content">
+                                                    <div class="grade-display" id="overallGradeDisplay">-</div>
+                                                    <div class="grade-label" id="overallGradeLabel">未评级</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 评价说明看板 -->
+                                        <div class="col-md-4 mb-3">
+                                            <div class="evaluation-board explanation-board">
+                                                <div class="board-header">
+                                                    <h6>评价说明</h6>
+                                                </div>
+                                                <div class="board-content">
+                                                    <div class="explanation-text" id="overallExplanationText">请先选择任务进行评价</div>
+                                                    <div class="improvement-measures" id="improvementMeasures">
+                                                        <h6>改进措施</h6>
+                                                        <p id="improvementText">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 名词解释区域 -->
+            <section id="glossarySection" class="mb-4" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>名词解释</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>成本管理指标</h5>
+                                <ul>
+                                    <li><strong>BAC (Budget at Completion)</strong>：预算总成本，项目完成时的总预算金额</li>
+                                    <li><strong>AC (Actual Cost)</strong>：实际成本，当前已完成工作的实际成本</li>
+                                    <li><strong>EV (Earned Value)</strong>：挣值，已完成工作的预算价值</li>
+                                    <li><strong>成本偏差</strong>：成本偏差 = AC - 任务成本计划，表示实际成本与计划成本的差异</li>
+                                    <li><strong>CPI (Cost Performance Index)</strong>：成本绩效指数 = EV/AC，衡量成本效率的指标</li>
+                                    <li><strong>ETC (Estimate to Complete)</strong>：完工尚需估算 = (BAC-EV)/CPI，预测完成剩余工作所需的成本</li>
+                                    <li><strong>EAC (Estimate at Completion)</strong>：完工总估算 = AC+ETC，预测项目完成时的总成本</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>CPI 颜色阈值说明</h5>
+                                <div class="alert alert-danger">
+                                    <strong>CPI < 0.9 (红色)</strong>：成本绩效差，实际成本超出预算
+                                </div>
+                                <div class="alert alert-warning">
+                                    <strong>0.9 ≤ CPI ≤ 1.0 (黄色)</strong>：成本绩效一般，接近预算
+                                </div>
+                                <div class="alert alert-success">
+                                    <strong>CPI > 1.0 (绿色)</strong>：成本绩效好，实际成本低于预算
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </main>
+
+        <footer class="bg-light text-center p-3 mt-5">
+            <p>&copy; 2025 项目运营管理部@HugoXu</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

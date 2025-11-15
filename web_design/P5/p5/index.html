@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目数据可视化系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 添加CSP策略以确保脚本安全加载 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;">
+    <!-- 使用CDN加载Chart.js和XLSX.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>项目收入统计</h1>
+        <div class="file-upload-container">
+            <label for="excel-file" class="file-upload-btn">选择Excel文件</label>
+            <input type="file" id="excel-file" accept=".xlsx,.xls">
+            <span id="file-name">未选择文件</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- 数据加载提示 -->
+        <div id="loading-indicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <p>正在处理数据...</p>
+        </div>
+
+        <!-- 无数据提示 -->
+        <div id="no-data-message" class="no-data-message">
+            <p>请上传Excel文件以查看数据可视化</p>
+        </div>
+
+        <!-- 数据可视化区域 -->
+        <div id="data-visualization" class="data-visualization hidden">
+            <!-- 项目选择器 -->
+            <div class="project-selector">
+                <label for="project-select">选择项目：</label>
+                <select id="project-select">
+                    <option value="">所有项目</option>
+                </select>
+            </div>
+
+            <!-- 任务选择器 -->
+            <div class="task-selector">
+                <label for="task-select">选择任务：</label>
+                <select id="task-select">
+                    <option value="">所有任务</option>
+                </select>
+            </div>
+
+            <!-- 项目总体情况 -->
+            <section class="section">
+                <h2>项目总体情况</h2>
+                
+                <!-- 总收入卡片 -->
+                <div class="card total-revenue-card">
+                    <h3>总收入</h3>
+                    <div class="card-value" id="total-revenue">0</div>
+                </div>
+
+                <!-- 指标卡片组 -->
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>合同总金额(TCV)</h4>
+                        <div class="card-value" id="tcv">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>价值工作量(EV)</h4>
+                        <div class="card-value" id="ev">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>已确认收入(RR)</h4>
+                        <div class="card-value" id="rr">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>已开票未回款(AR)</h4>
+                        <div class="card-value" id="ar">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>收现(CC)</h4>
+                        <div class="card-value" id="cc">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>收入计划(RRP)</h4>
+                        <div class="card-value" id="rrp">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>回款率</h4>
+                        <div class="card-value" id="collection-rate">0%</div>
+                    </div>
+                    <div class="card">
+                        <h4>收入偏差(RevCV)</h4>
+                        <div class="card-value" id="revenue-deviation">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 单任务分析 -->
+            <section class="section">
+                <h2>单任务分析</h2>
+                
+                <!-- 任务指标卡片组1 -->
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>价值工作量(EV)</h4>
+                        <div class="card-value" id="task-ev">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>已确认收入(RR)</h4>
+                        <div class="card-value" id="task-rr">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>已开票未回款(AR)</h4>
+                        <div class="card-value" id="task-ar">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>收现(CC)</h4>
+                        <div class="card-value" id="task-cc">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>收入计划(RRP)</h4>
+                        <div class="card-value" id="task-rrp">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>回款率</h4>
+                        <div class="card-value" id="task-collection-rate">0%</div>
+                    </div>
+                    <div class="card">
+                        <h4>收入偏差(RevCV)</h4>
+                        <div class="card-value" id="task-revenue-deviation">0</div>
+                    </div>
+                </div>
+
+                <!-- 任务指标卡片组2 -->
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>收入确认时间差</h4>
+                        <div class="card-value" id="revenue-confirmation-diff">0天</div>
+                    </div>
+                    <div class="card">
+                        <h4>收现时间差</h4>
+                        <div class="card-value" id="cash-collection-diff">0天</div>
+                    </div>
+                    <div class="card">
+                        <h4>收入平均确认时间</h4>
+                        <div class="card-value" id="avg-revenue-confirmation">0天</div>
+                    </div>
+                    <div class="card">
+                        <h4>收现平均确认时间</h4>
+                        <div class="card-value" id="avg-cash-collection">0天</div>
+                    </div>
+                    <div class="card">
+                        <h4>每米收入</h4>
+                        <div class="card-value" id="revenue-per-meter">0</div>
+                    </div>
+                    <div class="card">
+                        <h4>每米成本</h4>
+                        <div class="card-value" id="cost-per-meter">0</div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="charts-container">
+                    <!-- 工作时间圆饼图 -->
+                    <div class="chart-card">
+                        <h3>工作时间分布</h3>
+                        <canvas id="work-time-pie-chart"></canvas>
+                    </div>
+
+                    <!-- 收入占比圆饼图 -->
+                    <div class="chart-card">
+                        <h3>收入分布</h3>
+                        <canvas id="revenue-pie-chart"></canvas>
+                    </div>
+
+                    <!-- 甘特图 -->
+                    <div class="chart-card full-width">
+                        <h3>计划进度与实际进度对比</h3>
+                        <canvas id="gantt-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 项目评估部分 -->
+            <section class="section">
+                <h2>项目评估</h2>
+                
+                <!-- 项目健康评价 -->
+                <div class="evaluation-container">
+                    <h3>项目健康评价</h3>
+                    <div class="evaluation-content">
+                        <div class="radar-chart-container">
+                            <canvas id="health-radar-chart"></canvas>
+                        </div>
+                        <div class="evaluation-details">
+                            <h4>健康指标详情</h4>
+                            <div class="indicator-list" id="health-indicators">
+                                <!-- 健康指标详情将通过JS动态生成 -->
+                            </div>
+                            <div class="overall-evaluation" id="health-overall">
+                                <!-- 总体评价将通过JS动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 项目韧性评价 -->
+                <div class="evaluation-container">
+                    <h3>项目韧性评价</h3>
+                    <div class="evaluation-content">
+                        <div class="radar-chart-container">
+                            <canvas id="luck-radar-chart"></canvas>
+                        </div>
+                        <div class="evaluation-details">
+                            <h4>韧性指标详情</h4>
+                            <div class="indicator-list" id="luck-indicators">
+                                <!-- 韧性指标详情将通过JS动态生成 -->
+                            </div>
+                            <div class="overall-evaluation" id="luck-overall">
+                                <!-- 总体评价将通过JS动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 单个任务健康评价 -->
+                <div class="evaluation-container">
+                    <h3>单个任务健康评价</h3>
+                    <div class="evaluation-content">
+                        <div class="task-selector-container">
+                            <label for="health-task-select">选择任务：</label>
+                            <select id="health-task-select">
+                                <option value="">请选择任务</option>
+                            </select>
+                        </div>
+                        <div class="radar-chart-container">
+                            <canvas id="task-health-radar-chart"></canvas>
+                        </div>
+                        <div class="evaluation-details">
+                            <h4>任务健康指标详情</h4>
+                            <div class="indicator-list" id="task-health-indicators">
+                                <!-- 任务健康指标详情将通过JS动态生成 -->
+                            </div>
+                            <div class="overall-evaluation" id="task-health-overall">
+                                <!-- 总体评价将通过JS动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 单个任务韧性评价 -->
+                <div class="evaluation-container">
+                    <h3>单个任务韧性评价</h3>
+                    <div class="evaluation-content">
+                        <div class="task-selector-container">
+                            <label for="luck-task-select">选择任务：</label>
+                            <select id="luck-task-select">
+                                <option value="">请选择任务</option>
+                            </select>
+                        </div>
+                        <div class="radar-chart-container">
+                            <canvas id="task-luck-radar-chart"></canvas>
+                        </div>
+                        <div class="evaluation-details">
+                            <h4>任务韧性指标详情</h4>
+                            <div class="indicator-list" id="task-luck-indicators">
+                                <!-- 任务韧性指标详情将通过JS动态生成 -->
+                            </div>
+                            <div class="overall-evaluation" id="task-luck-overall">
+                                <!-- 总体评价将通过JS动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>项目收入统计@项目运营管理部·HugoXu &copy; 2025</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
