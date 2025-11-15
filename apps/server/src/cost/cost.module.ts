@@ -6,10 +6,13 @@ import { RevenueEvent } from '../revenue/entities/revenue-event.entity'
 import { CostService } from './cost.service'
 import { CostController } from './cost.controller'
 import { Project } from '../projects/entities/project.entity'
+import { ProgressPlan } from '../progress/entities/progress-plan.entity'
+import { ProgressEvent } from '../progress/entities/progress-event.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CostEvent, CostPlan, Project, RevenueEvent])],
+  imports: [TypeOrmModule.forFeature([CostEvent, CostPlan, Project, RevenueEvent, ProgressPlan, ProgressEvent])],
   controllers: [CostController],
-  providers: [CostService]
+  providers: [CostService],
+  exports: [CostService]
 })
 export class CostModule {}

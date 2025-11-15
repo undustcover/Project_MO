@@ -29,13 +29,38 @@ export class RevenueController {
   constructor(private readonly service: RevenueService) {}
 
   @Get('summary')
-  summary(@Query('projectId') projectId: string, @Query('from') from?: string, @Query('to') to?: string) {
-    return this.service.summary(Number(projectId), from, to)
+  summary(
+    @Query('projectId') projectId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('wellNumber') wellNumber?: string,
+    @Query('taskName') taskName?: string
+  ) {
+    return this.service.summary(Number(projectId), from, to, wellNumber, taskName)
   }
 
   @Get('template')
   template(@Res() res: Response) {
-    const header = ['来源', '项目', '金额', '日期', '备注']
+    const header = [
+      '井号',
+      '年度',
+      '任务名称',
+      '工作结构分解',
+      '计划开始时间',
+      '计划完成时间',
+      '实际开始时间',
+      '实际完成时间',
+      '实际工作量',
+      '单位',
+      '综合单价',
+      '附加费用',
+      '合计价值工作量',
+      '收入计划',
+      '确认收入时间',
+      '已确认金额',
+      '收现时间',
+      '收现金额'
+    ]
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.aoa_to_sheet([header])
     XLSX.utils.book_append_sheet(wb, ws, '模板')
@@ -53,20 +78,80 @@ export class RevenueController {
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const rows: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 })
     const header = rows[0] || []
-    const expect = ['来源', '项目', '金额', '日期', '备注']
+    const expect = [
+      '井号',
+      '年度',
+      '任务名称',
+      '工作结构分解',
+      '计划开始时间',
+      '计划完成时间',
+      '实际开始时间',
+      '实际完成时间',
+      '实际工作量',
+      '单位',
+      '综合单价',
+      '附加费用',
+      '合计价值工作量',
+      '收入计划',
+      '确认收入时间',
+      '已确认金额',
+      '收现时间',
+      '收现金额'
+    ]
     const missing = expect.filter((h, i) => String(header[i] || '') !== h)
     if (missing.length) return { ok: false, error: `列校验失败，请按模板列顺序：${expect.join(',')}` }
-    const out: { source: string; item: string; amount: number; date: string; remark?: string }[] = []
+    const out: any[] = []
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i]
       if (!r || r.length === 0) continue
-      const source = String(r[0] || '').trim()
-      const item = String(r[1] || '').trim()
-      const amount = Number(r[2] || 0)
-      const date = normalizeExcelDate(r[3])
-      const remark = String(r[4] || '').trim() || undefined
-      if (!source || !item || !date) continue
-      out.push({ source, item, amount, date, remark })
+      const wellNo = String(r[0] || '').trim() || undefined
+      const year = String(r[1] || '').trim() || undefined
+      const taskName = String(r[2] || '').trim() || undefined
+      const wbs = String(r[3] || '').trim() || undefined
+      const plannedStart = normalizeExcelDate(r[4]) || undefined
+      const plannedEnd = normalizeExcelDate(r[5]) || undefined
+      const actualStart = normalizeExcelDate(r[6]) || undefined
+      const actualEnd = normalizeExcelDate(r[7]) || undefined
+      const actualWorkload = r[8] != null && r[8] !== '' ? Number(r[8]) : undefined
+      const unit = String(r[9] || '').trim() || undefined
+      const unitPriceUSD = r[10] != null && r[10] !== '' ? Number(r[10]) : undefined
+      const additionalFeeUSD = r[11] != null && r[11] !== '' ? Number(r[11]) : undefined
+      const totalWorkValueUSD = r[12] != null && r[12] !== '' ? Number(r[12]) : undefined
+      const revenuePlanUSD = r[13] != null && r[13] !== '' ? Number(r[13]) : undefined
+      const revenueConfirmedDate = normalizeExcelDate(r[14]) || undefined
+      const revenueConfirmedAmountUSD = r[15] != null && r[15] !== '' ? Number(r[15]) : undefined
+      const cashDate = normalizeExcelDate(r[16]) || undefined
+      const cashAmountUSD = r[17] != null && r[17] !== '' ? Number(r[17]) : undefined
+      const source = wellNo || ''
+      const item = taskName || ''
+      const amount = revenueConfirmedAmountUSD != null ? Number(revenueConfirmedAmountUSD) : 0
+      const date = revenueConfirmedDate || ''
+      const remark = undefined
+      out.push({
+        source,
+        item,
+        amount,
+        date,
+        remark,
+        wellNo,
+        year,
+        taskName,
+        wbs,
+        plannedStart,
+        plannedEnd,
+        actualStart,
+        actualEnd,
+        actualWorkload,
+        unit,
+        unitPriceUSD,
+        additionalFeeUSD,
+        totalWorkValueUSD,
+        revenuePlanUSD,
+        revenueConfirmedDate,
+        revenueConfirmedAmountUSD,
+        cashDate,
+        cashAmountUSD
+      })
     }
     return this.service.import(Number(projectId), out)
   }

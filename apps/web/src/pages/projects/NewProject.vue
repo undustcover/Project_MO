@@ -4,12 +4,16 @@
       <div class="card-header">新建项目</div>
     </template>
     <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+      <el-divider>项目信息</el-divider>
+      <el-form-item label="项目名称" prop="name">
+        <el-input v-model="form.name" />
+      </el-form-item>
       <el-divider>基本信息</el-divider>
       <el-form-item label="合同编号" prop="contractNo">
         <el-input v-model="form.contractNo" />
       </el-form-item>
       <el-form-item label="合同周期" prop="contractRange">
-        <el-date-picker v-model="form.contractRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" />
+        <el-date-picker v-model="form.contractRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
       </el-form-item>
       <el-form-item label="工作量" prop="workloadText">
         <el-input v-model="form.workloadText" />
@@ -24,19 +28,19 @@
 
       <el-divider>时间节点</el-divider>
       <el-form-item label="开工日期" prop="startDate">
-        <el-date-picker v-model="form.startDate" type="date" />
+        <el-date-picker v-model="form.startDate" type="date" value-format="YYYY-MM-DD" />
       </el-form-item>
       <el-form-item label="验收合格日期" prop="acceptanceDate">
-        <el-date-picker v-model="form.acceptanceDate" type="date" />
+        <el-date-picker v-model="form.acceptanceDate" type="date" value-format="YYYY-MM-DD" />
       </el-form-item>
       <el-form-item label="尾款到账日期" prop="finalPaymentDate">
-        <el-date-picker v-model="form.finalPaymentDate" type="date" />
+        <el-date-picker v-model="form.finalPaymentDate" type="date" value-format="YYYY-MM-DD" />
       </el-form-item>
       <el-form-item label="保函释放日期" prop="bondReleaseDate">
-        <el-date-picker v-model="form.bondReleaseDate" type="date" />
+        <el-date-picker v-model="form.bondReleaseDate" type="date" value-format="YYYY-MM-DD" />
       </el-form-item>
       <el-form-item label="总结复盘日期" prop="reviewDate">
-        <el-date-picker v-model="form.reviewDate" type="date" />
+        <el-date-picker v-model="form.reviewDate" type="date" value-format="YYYY-MM-DD" />
       </el-form-item>
 
       <el-divider>参与单位</el-divider>
@@ -69,9 +73,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { createProject } from '../../services/api'
 const formRef = ref()
 const form = ref({
+  name: '',
   contractNo: '',
   contractRange: [],
   workloadText: '',
@@ -86,6 +92,7 @@ const form = ref({
   subcontractors: [] as Array<{ key: string; value: string }>
 })
 const rules = {
+  name: [{ required: true, message: '必填' }],
   contractNo: [{ required: true, message: '必填' }],
   contractRange: [{ type: 'array', required: true, message: '请选择合同周期' }],
   amountValue: [{ required: true, message: '必填' }]
@@ -100,21 +107,28 @@ async function submit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   const payload = {
+    name: form.value.name,
     contractNo: form.value.contractNo,
-    contractStart: form.value.contractRange?.[0] || '',
-    contractEnd: form.value.contractRange?.[1] || '',
+    contractStart: form.value.contractRange?.[0] || undefined,
+    contractEnd: form.value.contractRange?.[1] || undefined,
     workloadText: form.value.workloadText,
     amountValue: form.value.amountValue,
     amountCurrency: form.value.amountCurrency,
-    startDate: form.value.startDate,
-    acceptanceDate: form.value.acceptanceDate,
-    finalPaymentDate: form.value.finalPaymentDate,
-    bondReleaseDate: form.value.bondReleaseDate,
-    reviewDate: form.value.reviewDate,
+    startDate: form.value.startDate || undefined,
+    acceptanceDate: form.value.acceptanceDate || undefined,
+    finalPaymentDate: form.value.finalPaymentDate || undefined,
+    bondReleaseDate: form.value.bondReleaseDate || undefined,
+    reviewDate: form.value.reviewDate || undefined,
     participants: form.value.participants,
     subcontractors: form.value.subcontractors
   }
-  await createProject(payload)
+  const res = await createProject(payload)
+  if (res.ok) {
+    ElMessage.success('提交成功')
+  } else {
+    const msg = typeof res.body === 'string' ? res.body : (res.body?.message || '')
+    ElMessage.error(`提交失败${res.status ? '（'+res.status+'）' : ''}${msg ? '：'+msg : ''}`)
+  }
 }
 function reset() {
   formRef.value.resetFields()

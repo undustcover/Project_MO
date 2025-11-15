@@ -21,17 +21,20 @@ export class AlertRecord {
   @Column({ length: 500 })
   message: string
 
+  @Column({ length: 200, nullable: true })
+  dedupKey?: string
+
   @Column('simple-json', { nullable: true })
   relatedData?: any
 
   @Column({ length: 20, default: 'active' })
   status: string
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date
+  @Column({ length: 20 })
+  createdAt: string
 
-  @Column({ type: 'timestamp', nullable: true })
-  resolvedAt?: Date
+  @Column({ length: 20, nullable: true })
+  resolvedAt?: string
 
   @Column({ length: 200, nullable: true })
   resolutionNote?: string

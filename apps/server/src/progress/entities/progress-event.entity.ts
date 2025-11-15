@@ -12,6 +12,9 @@ export class ProgressEvent {
   @Column({ nullable: true })
   wellNumber: string
 
+  @Column({ length: 200, nullable: true })
+  taskName?: string
+
   @Column()
   conditionName: string
 

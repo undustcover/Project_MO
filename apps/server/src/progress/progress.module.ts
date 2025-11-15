@@ -10,6 +10,7 @@ import { ContractMetric } from './entities/contract-metric.entity'
 @Module({
   imports: [TypeOrmModule.forFeature([ProgressEvent, Project, ProgressPlan, ContractMetric])],
   controllers: [ProgressController],
-  providers: [ProgressService]
+  providers: [ProgressService],
+  exports: [ProgressService]
 })
 export class ProgressModule {}

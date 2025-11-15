@@ -9,6 +9,9 @@ class KVDto {
 }
 
 export class CreateProjectDto {
+  @IsOptional()
+  @IsString()
+  name?: string
   @IsString()
   contractNo: string
   @IsOptional()

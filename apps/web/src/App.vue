@@ -14,6 +14,7 @@
           <el-menu-item index="/revenue">收入</el-menu-item>
           <el-menu-item index="/alerts">预警</el-menu-item>
         </el-menu>
+        <div class="aside-footer">川庆国际项目运营管理部</div>
       </el-aside>
       <el-container>
         <el-header class="app-header">
@@ -50,8 +51,9 @@
   --menu-active: #1f2937;
 }
 .app-container { height: 100vh; background: linear-gradient(135deg, var(--bg) 0%, var(--bg-grad-end) 100%); font-family: "Segoe UI", "Inter", "PingFang SC", "Hiragino Sans", "Microsoft YaHei", Arial, sans-serif; }
-.app-aside { padding: 16px; background:#0f172a; color:#e2e8f0; }
+.app-aside { padding: 16px; background:#0f172a; color:#e2e8f0; display:flex; flex-direction:column; height:100%; }
 .brand { font-weight: 800; margin: 8px 0 16px; letter-spacing: .4px; }
+.aside-footer { margin-top:auto; padding-top:12px; font-size:12px; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.08); }
 .app-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background:var(--header-bg); color:var(--header-text); }
 .header-title { font-weight: 600; }
 .header-brand { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: linear-gradient(135deg,#1f2937 0%, #374151 100%); color:#e5e7eb; border:1px solid #4b5563; }

@@ -65,18 +65,16 @@
       <el-col :span="12">
         <el-card shadow="hover">
           <div class="sub-title">评分明细</div>
-          <el-table :data="scoresTable" size="small" border>
-            <el-table-column prop="name" label="维度" />
-            <el-table-column label="评分">
-              <template #default="scope">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <el-progress :percentage="Math.round((Number(scope.row.score)||0)/5*100)" :stroke-width="12" status="success" style="flex:1" />
-                  <span style="width:64px; text-align:right;">{{ Number(scope.row.score||0).toFixed(2) }}/5</span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="formula" label="公式说明" />
-          </el-table>
+          <div class="metric-list">
+            <div class="metric-item" v-for="m in scoresTable" :key="m.name">
+              <div class="metric-head">
+                <span class="metric-name">{{ m.name }}</span>
+                <span class="metric-score">{{ Number(m.score || 0).toFixed(2) }}/5</span>
+              </div>
+              <el-progress :percentage="Math.round((Number(m.score || 0) / 5) * 100)" :stroke-width="12" :color="progressColor(Number(m.score || 0))" />
+              <div class="metric-formula">{{ m.formula }}</div>
+            </div>
+          </div>
           <div class="overall">
             <span>综合得分：</span>
             <span class="overall-score">{{ overallScore.toFixed(2) }}</span>
@@ -430,6 +428,13 @@ function calculate() {
   updateEvaluation()
   render()
 }
+function progressColor(s: number) {
+  if (s >= 4.5) return '#10b981'
+  if (s >= 3.5) return '#22c55e'
+  if (s >= 2.5) return '#f59e0b'
+  if (s >= 1.5) return '#f97316'
+  return '#ef4444'
+}
 // 追加：项目评价文案生成
 function updateEvaluation() {
   const s = overallScore.value
@@ -725,4 +730,10 @@ function renderPlanBar(cats: string[] = [], planVals: number[] = [], actualVals:
   .pie { height: 90mm !important; break-inside: avoid; page-break-inside: avoid; }
   .el-table { break-inside: avoid; page-break-inside: avoid; }
 }
+.metric-list { display: flex; flex-direction: column; gap: 12px; }
+.metric-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
+.metric-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.metric-name { font-weight:600; color:#0f172a; }
+.metric-score { font-weight:700; color:#334155; }
+.metric-formula { margin-top:8px; color:#475569; font-size:12px; }
 </style>

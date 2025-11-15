@@ -12,6 +12,9 @@ export class CostPlan {
   @Column({ length: 200 })
   taskName: string
 
+  @Column({ length: 100, nullable: true })
+  wellNumber?: string
+
   @Column('decimal', { precision: 14, scale: 2, nullable: true })
   projectBudget?: number
 
@@ -29,4 +32,7 @@ export class CostPlan {
 
   @Column('decimal', { precision: 14, scale: 2, nullable: true })
   budgetServices?: number
+
+  @Column('decimal', { precision: 14, scale: 2, nullable: true })
+  budgetIndirect?: number
 }

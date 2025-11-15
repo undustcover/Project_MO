@@ -129,7 +129,7 @@ export class ProgressService {
     return rows.map(r => r.wellNumber).filter(Boolean)
   }
 
-  async importPlan(projectId: number, rows: Array<{ wellNumber: string; conditionName: string; planStartDate: string; planEndDate: string }>) {
+  async importPlan(projectId: number, rows: Array<{ wellNumber: string; taskName?: string; conditionName: string; planStartDate: string; planEndDate: string }>) {
     const project = await this.projectsRepo.findOne({ where: { id: projectId } })
     if (!project) return { ok: false, error: '项目不存在' }
     const out = rows

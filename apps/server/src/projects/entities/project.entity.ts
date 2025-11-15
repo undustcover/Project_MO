@@ -7,6 +7,9 @@ export class Project {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ nullable: true })
+  name: string
+
   @Column()
   contractNo: string
 

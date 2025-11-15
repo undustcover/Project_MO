@@ -12,6 +12,9 @@ export class ProgressPlan {
   @Column({ length: 100 })
   wellNumber: string
 
+  @Column({ length: 200, nullable: true })
+  taskName?: string
+
   @Column({ length: 200 })
   conditionName: string
 

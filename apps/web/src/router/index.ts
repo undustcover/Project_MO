@@ -6,6 +6,7 @@ const ProgressDashboard = () => import('../pages/progress/ProgressDashboard.vue'
 const CostDashboard = () => import('../pages/cost/CostDashboard.vue')
 const RevenueDashboard = () => import('../pages/revenue/RevenueDashboard.vue')
 const AlertsBoard = () => import('../pages/alerts/AlertsBoard.vue')
+const AlertsConfigPage = () => import('../pages/alerts/AlertsConfigPage.vue')
 
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/projects' },
@@ -16,6 +17,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/cost', component: CostDashboard },
   { path: '/revenue', component: RevenueDashboard },
   { path: '/alerts', component: AlertsBoard }
+  ,{ path: '/alerts/configs', component: AlertsConfigPage }
 ]
 
 export default createRouter({

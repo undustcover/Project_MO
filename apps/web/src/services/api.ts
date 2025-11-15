@@ -7,18 +7,39 @@ export async function getProjects() {
 }
 
 export async function createProject(payload: any) {
-  const res = await fetch(`${BASE_URL}/projects`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  return res.ok
+  try {
+    const res = await fetch(`${BASE_URL}/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    const text = await res.text()
+    let body: any = null
+    try { body = text ? JSON.parse(text) : null } catch {}
+    return { ok: res.ok, status: res.status, body: body ?? text }
+  } catch (e: any) {
+    return { ok: false, status: 0, body: e?.message || 'Network error' }
+  }
 }
 
 export async function getProject(id: number) {
   const res = await fetch(`${BASE_URL}/projects/` + id)
   if (!res.ok) return null
   return res.json()
+}
+
+export async function updateProject(id: number, payload: any) {
+  const res = await fetch(`${BASE_URL}/projects/` + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  return res.ok
+}
+
+export async function deleteProject(id: number) {
+  const res = await fetch(`${BASE_URL}/projects/` + id, { method: 'DELETE' })
+  return res.ok
 }
 
 export async function getProgressDashboard(params: { projectId: number; taskName?: string; from?: string; to?: string; wellNumber?: string }) {

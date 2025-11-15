@@ -9,6 +9,9 @@ export class CostEvent {
   @ManyToOne(() => Project, p => p.id, { nullable: false })
   project: Project
 
+  @Column({ length: 100, nullable: true })
+  wellNumber?: string
+
   @Column({ length: 200 })
   taskName: string
 
@@ -35,7 +38,4 @@ export class CostEvent {
 
   @Column('decimal', { precision: 14, scale: 2 })
   totalCost: number
-
-  @Column('decimal', { precision: 14, scale: 2, nullable: true })
-  revenue?: number
 }
