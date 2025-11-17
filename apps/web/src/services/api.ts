@@ -222,3 +222,20 @@ export async function getTrackingTable(projectId: number) {
   if (!res.ok) return { rows: [] }
   return res.json()
 }
+
+export async function setTrackingFocus(projectId: number, contractNo: string) {
+  const u = new URL(`/api/dashboard/tracking/focus/set`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  u.searchParams.set('contractNo', contractNo)
+  const res = await fetch(u.toString(), { method: 'POST' })
+  const d = await res.json().catch(() => ({ ok: res.ok }))
+  return !!(d?.ok)
+}
+
+export async function getTrackingFocusList(projectId: number) {
+  const u = new URL(`/api/dashboard/tracking/focus/list`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  const res = await fetch(u.toString())
+  if (!res.ok) return { rows: [] }
+  return res.json()
+}

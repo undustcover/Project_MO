@@ -10,6 +10,7 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 011-1h12a1 1 0 011 1v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2z"/></svg>
         </a>
       </el-tooltip>
+      <el-button type="primary" class="ml8" @click="openFocus">重点项目</el-button>
     </div>
 
   <el-row :gutter="12" class="mt12">
@@ -146,7 +147,7 @@
       <el-col :span="24">
         <el-card shadow="hover">
           <div class="sub-title">详情列表</div>
-          <el-table :data="tableRows" size="small" border height="480">
+          <el-table :data="tableRows" size="small" border height="640">
             <el-table-column prop="marketCountry" label="市场国别" />
             <el-table-column prop="indexNo" label="序号" />
             <el-table-column prop="teamNo" label="队伍编号（国工编号）" />
@@ -165,6 +166,11 @@
             <el-table-column prop="constructionStatus" label="施工情况" />
             <el-table-column prop="nextMarketPlan" label="下轮市场计划" />
             <el-table-column prop="remark" label="备注说明" />
+            <el-table-column label="操作" width="120">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" @click="markFocus(row.contractNo)" :disabled="!row.contractNo">设为重点</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -176,7 +182,8 @@
 import * as echarts from 'echarts'
 import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getProjects, getTrackingSummary, getTrackingTable } from '../../services/api'
+import { getProjects, getTrackingSummary, getTrackingTable, setTrackingFocus } from '../../services/api'
+import { useRouter } from 'vue-router'
 
 const projects = ref<any[]>([])
 const projectId = ref<number>()
@@ -237,6 +244,17 @@ async function load() {
 
 function onImportSuccess() { ElMessage.success('导入成功'); load() }
 function onImportError() { ElMessage.error('导入失败') }
+const router = useRouter()
+function openFocus() {
+  const pid = projectId.value ? String(projectId.value) : ''
+  router.push({ path: '/tracking/focus', query: pid ? { projectId: pid } : {} })
+}
+async function markFocus(contractNo: string) {
+  if (!projectId.value || !contractNo) return
+  const ok = await setTrackingFocus(projectId.value, contractNo)
+  if (ok) ElMessage.success('已设为重点关注项目')
+  else ElMessage.error('设为重点失败：请检查合同编号是否已录入')
+}
 
 function renderUsage() {
   if (!usageRef.value) return

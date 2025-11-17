@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { TrackingRecord } from './entities/tracking-record.entity'
+import { FocusProject } from './entities/focus-project.entity'
 import { Project } from '../projects/entities/project.entity'
 
 @Injectable()
 export class TrackingService {
   constructor(
     @InjectRepository(TrackingRecord) private repo: Repository<TrackingRecord>,
-    @InjectRepository(Project) private projects: Repository<Project>
+    @InjectRepository(Project) private projects: Repository<Project>,
+    @InjectRepository(FocusProject) private focusRepo: Repository<FocusProject>
   ) {}
 
   async import(projectId: number, items: Array<Partial<TrackingRecord>>) {
@@ -121,5 +123,87 @@ export class TrackingService {
       ageDistribution,
       expiringContracts
     }
+  }
+
+  async setFocus(projectId: number, contractNo: string) {
+    const project = await this.projects.findOne({ where: { id: projectId } })
+    if (!project) return { ok: false, error: '项目不存在' }
+    const exists = await this.repo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
+    if (!exists) return { ok: false, error: `合同编号未录入：${contractNo}` }
+    const dup = await this.focusRepo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
+    if (dup) return { ok: true }
+    await this.focusRepo.save(this.focusRepo.create({ project, contractNo }))
+    return { ok: true }
+  }
+
+  async listFocus(projectId: number) {
+    const project = await this.projects.findOne({ where: { id: projectId } })
+    if (!project) return { rows: [] }
+    const focus = await this.focusRepo.find({ where: { project: { id: projectId } as any } })
+    const byContract = new Map<string, TrackingRecord | undefined>()
+    const recs = await this.repo.find({ where: { project: { id: projectId } as any } })
+    for (const r of recs) { const k = String(r.contractNo || ''); if (k) byContract.set(k, r) }
+    const rows = focus.map(f => {
+      const r = byContract.get(f.contractNo)
+      return {
+        contractNo: f.contractNo,
+        region: r?.marketCountry || '',
+        executor: r?.executor || '',
+        rigNo: r?.teamNo || '',
+        projectTerm: r?.contractStartDate && r?.contractEndDate ? `${r.contractStartDate} ~ ${r.contractEndDate}` : '',
+        projectName: f.projectName || '',
+        workloadCount: f.workloadCount ?? null,
+        realtimeProgress: f.realtimeProgress || '',
+        firstWellSpudTime: f.firstWellSpudTime || '',
+        focusItems: f.focusItems || '',
+        workValueDone: f.workValueDone || '',
+        expectedWorkThisYear: f.expectedWorkThisYear || ''
+      }
+    })
+    return { rows }
+  }
+
+  async importFocus(projectId: number, items: Array<any>) {
+    const project = await this.projects.findOne({ where: { id: projectId } })
+    if (!project) return { ok: false, error: '项目不存在' }
+    const contractSet = new Set((await this.repo.find({ where: { project: { id: projectId } as any } })).map(r => String(r.contractNo || '')))
+    const missing: string[] = []
+    const normalizeDt = (v: any) => {
+      let s = String(v || '').trim()
+      if (!s) return undefined
+      s = s.replace(/[:]/g, '-').replace(/^(.{10})-/, '$1 ')
+      const d = new Date(s)
+      if (isNaN(d.getTime())) return undefined
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const da = String(d.getDate()).padStart(2, '0')
+      const hh = String(d.getHours()).padStart(2, '0')
+      const mm = String(d.getMinutes()).padStart(2, '0')
+      return `${y}-${m}-${da} ${hh}:${mm}`
+    }
+    const cleaned: FocusProject[] = []
+    for (const it of items) {
+      const cn = String(it.contractNo || '').trim()
+      if (!cn || !contractSet.has(cn)) { missing.push(cn || '(空合同编号)'); continue }
+      const fp = this.focusRepo.create({
+        project,
+        contractNo: cn,
+        projectName: String(it.projectName || '').trim() || undefined,
+        workloadCount: it.workloadCount != null && it.workloadCount !== '' ? Number(it.workloadCount) : undefined,
+        realtimeProgress: String(it.realtimeProgress || '').trim() || undefined,
+        firstWellSpudTime: normalizeDt(it.firstWellSpudTime) || undefined,
+        focusItems: String(it.focusItems || '').trim() || undefined,
+        workValueDone: String(it.workValueDone || '').trim() || undefined,
+        expectedWorkThisYear: String(it.expectedWorkThisYear || '').trim() || undefined
+      })
+      cleaned.push(fp)
+    }
+    if (missing.length) return { ok: false, error: `合同编号未录入：${missing.join(', ')}` }
+    if (cleaned.length) {
+      const cns = cleaned.map(c => c.contractNo)
+      await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND contractNo IN (:...cns)', { pid: projectId, cns }).execute()
+      await this.focusRepo.save(cleaned)
+    }
+    return { ok: true, count: cleaned.length }
   }
 }

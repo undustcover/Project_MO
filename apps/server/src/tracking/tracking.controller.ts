@@ -145,4 +145,71 @@ export class TrackingController {
 
   @Delete('clear')
   async clear(@Query('projectId') projectId?: string) { return this.service.clear(projectId ? Number(projectId) : undefined) }
+
+  @Post('focus/set')
+  async setFocus(@Query('projectId') projectId: string, @Query('contractNo') contractNo: string) {
+    return this.service.setFocus(Number(projectId), contractNo)
+  }
+
+  @Get('focus/list')
+  async listFocus(@Query('projectId') projectId: string) { return this.service.listFocus(Number(projectId)) }
+
+  @Get('focus/template')
+  focusTemplate(@Res() res: Response) {
+    const header = [
+      '合同编号',
+      '项目名称',
+      '工作量（口）',
+      '项目实时进度',
+      '首井开钻时间',
+      '重点关注事项',
+      '已完成价值工作量',
+      '今年预计完成工作量'
+    ]
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([header])
+    XLSX.utils.book_append_sheet(wb, ws, '模板')
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.setHeader('Content-Disposition', 'attachment; filename="focus_template.xlsx"')
+    res.send(buf)
+  }
+
+  @Post('focus/import')
+  @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
+  async importFocus(@UploadedFile() file: Express.Multer.File, @Query('projectId') projectId: string) {
+    if (!file || !file.buffer) return { ok: false, error: '未收到文件' }
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const rows: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+    const header = rows[0] || []
+    const expect = [
+      '合同编号',
+      '项目名称',
+      '工作量（口）',
+      '项目实时进度',
+      '首井开钻时间',
+      '重点关注事项',
+      '已完成价值工作量',
+      '今年预计完成工作量'
+    ]
+    const invalid = expect.filter((h, i) => String(header[i] || '') !== h)
+    if (invalid.length) return { ok: false, error: `列校验失败，请按模板列顺序：${expect.join(',')}` }
+    const items: any[] = []
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i]
+      if (!r || r.length === 0) continue
+      items.push({
+        contractNo: String(r[0] || '').trim(),
+        projectName: String(r[1] || '').trim(),
+        workloadCount: r[2] != null && r[2] !== '' ? Number(r[2]) : undefined,
+        realtimeProgress: String(r[3] || '').trim(),
+        firstWellSpudTime: r[4],
+        focusItems: String(r[5] || '').trim(),
+        workValueDone: String(r[6] || '').trim(),
+        expectedWorkThisYear: String(r[7] || '').trim()
+      })
+    }
+    return this.service.importFocus(Number(projectId), items)
+  }
 }
