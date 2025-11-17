@@ -39,6 +39,17 @@ export class RevenueController {
     return this.service.summary(Number(projectId), from, to, wellNumber, taskName)
   }
 
+  @Get('sixRadar')
+  sixRadar(
+    @Query('projectId') projectId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('wellNumber') wellNumber?: string,
+    @Query('taskName') taskName?: string
+  ) {
+    return this.service.sixRadar(Number(projectId), from, to, wellNumber, taskName)
+  }
+
   @Get('template')
   template(@Res() res: Response) {
     const header = [

@@ -56,6 +56,35 @@ export class RevenueService {
     return { total, chart: { categories, values }, rows: rows.map((r, i) => ({ ...r, costTotal: costTotals[i] })), aggregatedCost }
   }
 
+  async sixRadar(projectId: number, from?: string, to?: string, wellNumber?: string, taskName?: string) {
+    const s = await this.summary(projectId, from, to, wellNumber, taskName)
+    const rows = s.rows || []
+    const plan = rows.reduce((sum: number, r: any) => sum + Number(r.revenuePlanUSD || 0), 0)
+    const confirmed = rows.reduce((sum: number, r: any) => sum + Number(r.revenueConfirmedAmountUSD || 0), 0)
+    const workValue = rows.reduce((sum: number, r: any) => sum + Number(r.totalWorkValueUSD || 0), 0)
+    const cash = rows.reduce((sum: number, r: any) => sum + Number(r.cashAmountUSD || 0), 0)
+    const cost = rows.reduce((sum: number, r: any) => sum + Number(r.costTotal || 0), 0)
+    const n = rows.length || 1
+    const deltaPct = plan > 0 ? ((confirmed - plan) / plan) * 100 : 0
+    const s1 = (() => { const pos = deltaPct >= 0 ? deltaPct / 10 : Math.abs(deltaPct) / 5; return Number((5 * (1 - Math.max(0, Math.min(1, pos)))).toFixed(2)) })()
+    const ratioWV = plan > 0 ? (workValue / plan) * 100 : 0
+    const s2 = (() => { const diff = Math.abs(ratioWV - 100) / 10; return Number((5 * (1 - Math.max(0, Math.min(1, diff)))).toFixed(2)) })()
+    const daysBetween = (a?: string, b?: string) => { if (!a || !b) return 0; const da = new Date(a).getTime(); const db = new Date(b).getTime(); return Math.round((da - db) / (24 * 3600 * 1000)) }
+    const avgConfirmDelay = (() => { let sum = 0; let count = 0; for (const r of rows) { if (r.revenueConfirmedDate && r.actualEnd) { sum += daysBetween(r.revenueConfirmedDate, r.actualEnd); count++ } } return count ? sum / count : 0 })()
+    const s3 = (() => { const t = (avgConfirmDelay - 10) / (25 - 10); return Number((5 * (1 - Math.max(0, Math.min(1, t)))).toFixed(2)) })()
+    const avgIdx = (() => { let sum = 0; let count = 0; for (const r of rows) { if (r.plannedStart && r.plannedEnd) { const ps = new Date(r.plannedStart).getTime(); const pe = new Date(r.plannedEnd).getTime(); const as = r.actualEnd ? new Date(r.actualEnd).getTime() : pe; const planSpan = Math.max(1, Math.round((pe - ps) / (24*3600*1000))); const actDiff = Math.round((as - pe) / (24*3600*1000)); const idx = ((planSpan) - (actDiff)) / (planSpan); sum += idx; count++ } } return count ? (sum / count) : 0 })()
+    const s4 = (() => { return Number((5 * Math.max(0, Math.min(1, (avgIdx - 0.55) / (1.1 - 0.55)))).toFixed(2)) })()
+    const base = Number((await this.projects.findOne({ where: { id: projectId } }))?.amountValue || 0)
+    const s5a = (() => { const rate = base > 0 ? (cash / base) : 0; return Number((2.5 * Math.max(0, Math.min(1, rate))).toFixed(2)) })()
+    const s5b = (() => { let sum = 0; for (const r of rows) { const plannedCash = r.plannedEnd; const diff = plannedCash ? (daysBetween(plannedCash, r.cashDate) - daysBetween(r.cashDate, r.actualEnd)) : 0; sum += diff } const minV = -10 * n; const maxV = 60 * n; const t = (sum - minV) / (maxV - minV); return Number((2.5 * Math.max(0, Math.min(1, t))).toFixed(2)) })()
+    const idxCF = (() => { const v = cost > 0 ? (1 - ((workValue - cash) / cost)) : 0; return v })()
+    const s6 = (() => { const t = (idxCF - 0.4) / (0.8 - 0.4); return Number((5 * Math.max(0, Math.min(1, t))).toFixed(2)) })()
+    const scores = { incomePlanRate: s1, workValuePlanRate: s2, confirmTimeDelta: s3, scheduleDeviationIndex: s4, cashIndex: Number((s5a + s5b).toFixed(2)), cashFlowIndex: s6 }
+    const overall = Number(((scores.incomePlanRate + scores.workValuePlanRate + scores.confirmTimeDelta + scores.scheduleDeviationIndex + scores.cashIndex + scores.cashFlowIndex) / 6).toFixed(2))
+    const ok = Object.values(scores).some(v => Number(v) > 0)
+    return { ok, scores, overall }
+  }
+
   async import(projectId: number, items: Array<any>) {
     const project = await this.projects.findOne({ where: { id: projectId } })
     if (!project) return { ok: false, error: '项目不存在' }

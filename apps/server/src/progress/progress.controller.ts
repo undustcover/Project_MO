@@ -256,6 +256,16 @@ export class ProgressController {
   async getContract(@Query('projectId') projectId: string, @Query('wellNumber') wellNumber?: string) {
     return this.service.getContract(Number(projectId), wellNumber)
   }
+
+  @Get('sixRadar')
+  sixRadar(
+    @Query('projectId') projectId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('wellNumber') wellNumber?: string
+  ) {
+    return this.service.sixRadar(Number(projectId), from, to, wellNumber)
+  }
 }
 
 function calcHours(startTime: string, endTime: string) {

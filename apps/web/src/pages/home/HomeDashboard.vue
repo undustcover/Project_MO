@@ -173,6 +173,7 @@
 import * as echarts from 'echarts'
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { getProjects, getProject, getProjectGoalsSummary, getProjectHomeConfig } from '../../services/api'
+import { getProgressSixRadar, getRevenueSixRadar } from '../../services/api'
 
 const projects = ref<any[]>([])
 const projectId = ref<number>()
@@ -188,6 +189,7 @@ let progressRadarChart: echarts.ECharts | null = null
 let progressCyclePieChart: echarts.ECharts | null = null
 let progressEffPieChart: echarts.ECharts | null = null
 const progressFields = ref<any[]>([])
+const progressScores = ref({ productionRate: 0, nonProductionRate: 0, midCompletion: 0, drillingEfficiency: 0, trippingEfficiency: 0, contractUtilization: 0 })
 
 const costKpis = ref<any>({})
 const costRadarRef = ref<HTMLDivElement | null>(null)
@@ -203,6 +205,7 @@ let revPieChart: echarts.ECharts | null = null
 let revWorkPieChart: echarts.ECharts | null = null
 const revenueRows = ref<any[]>([])
 const revenueFields = ref<any[]>([])
+const revenueScores = ref({ incomePlanRate: 0, workValuePlanRate: 0, confirmTimeDelta: 0, scheduleDeviationIndex: 0, cashIndex: 0, cashFlowIndex: 0 })
 
 const alertSevRef = ref<HTMLDivElement | null>(null)
 const alertTypeRef = ref<HTMLDivElement | null>(null)
@@ -276,6 +279,8 @@ async function loadProgress() {
     { name: '进尺工作时间(h)', value: vals.footage },
     { name: '建井周期(h)', value: vals.wellCycle }
   ]
+  const pr = await getProgressSixRadar({ projectId: projectId.value! })
+  if (pr?.ok) progressScores.value = pr.scores || progressScores.value
 }
 async function loadCost() {
   const uK = new URL('/api/dashboard/cost/kpis', window.location.origin)
@@ -304,6 +309,8 @@ async function loadRevenue() {
     { name: '每米成本(USD)', value: formatMoney(footageMeters>0 ? (aggCost/footageMeters) : 0) },
     { name: '每米进尺收入(USD)', value: formatMoney(footageMeters>0 ? (total/footageMeters) : 0) }
   ]
+  const rr = await getRevenueSixRadar({ projectId: projectId.value! })
+  if (rr?.ok) revenueScores.value = rr.scores || revenueScores.value
 }
 async function loadAlerts() {
   const u = new URL('/api/dashboard/alerts/records', window.location.origin)
@@ -319,7 +326,14 @@ function renderProgress() {
   if (progressEffPieRef.value && !progressEffPieChart) progressEffPieChart = echarts.init(progressEffPieRef.value)
   const d = progressData.value || {}
   const labels = ['生产时间达成率','非生产时效控制率','中完时间达成率','纯钻时效','起下钻时效','合同时间利用率']
-  const vals = [0,0,0,0,0,0]
+  const vals = [
+    progressScores.value.productionRate,
+    progressScores.value.nonProductionRate,
+    progressScores.value.midCompletion,
+    progressScores.value.drillingEfficiency,
+    progressScores.value.trippingEfficiency,
+    progressScores.value.contractUtilization
+  ]
   const radarEmpty = vals.every(v => Number(v) === 0)
   progressRadarChart?.setOption({
     tooltip:{ trigger:'item' },
@@ -370,7 +384,9 @@ function renderCost() {
 function renderRevenue() {
   if (revRadarRef.value && !revRadarChart) revRadarChart = echarts.init(revRadarRef.value)
   const labels = ['收入计划完成率','价值工作量完成计划','收入确认时间差','进度偏差指数','回款指数','现金流指数']
-  revRadarChart?.setOption({ tooltip:{ trigger:'item' }, radar:{ indicator: labels.map(l=>({ name:l, max:5 })) }, series:[{ type:'radar', data:[{ value:[0,0,0,0,0,0] }] }], graphic:[{ type:'text', left:'center', top:'center', style:{ text:'暂无数据', fill:'#94a3b8', fontSize:16, fontWeight:600 } }] })
+  const rVals = [revenueScores.value.incomePlanRate, revenueScores.value.workValuePlanRate, revenueScores.value.confirmTimeDelta, revenueScores.value.scheduleDeviationIndex, revenueScores.value.cashIndex, revenueScores.value.cashFlowIndex]
+  const rEmpty = rVals.every(v => Number(v) === 0)
+  revRadarChart?.setOption({ tooltip:{ trigger:'item' }, radar:{ indicator: labels.map(l=>({ name:l, max:5 })) }, series:[{ type:'radar', data:[{ value:rVals }] }], graphic: rEmpty ? [{ type:'text', left:'center', top:'center', style:{ text:'暂无数据', fill:'#94a3b8', fontSize:16, fontWeight:600 } }] : [] })
   if (revPieRef.value && !revPieChart) revPieChart = echarts.init(revPieRef.value)
   if (revWorkPieRef.value && !revWorkPieChart) revWorkPieChart = echarts.init(revWorkPieRef.value)
   const inner = new Map<string, number>()
@@ -398,6 +414,7 @@ function renderRevenue() {
   const totalWork = innerData2.reduce((s:number, d:any)=>s+Number(d.value||0),0)
   revWorkPieChart?.setOption({ tooltip:{ trigger:'item', formatter:'{b}: {c} ({d}%)' }, legend:{ top:0, type:'scroll' }, series:[{ type:'pie', radius:['32%','46%'], data: innerData2 },{ type:'pie', radius:['52%','72%'], data: outer2 }], graphic: totalWork === 0 ? [{ type:'text', left:'center', top:'center', style:{ text:'暂无数据', fill:'#94a3b8', fontSize:16, fontWeight:600 } }] : [] })
 }
+function daysBetween(a?: string, b?: string) { if (!a || !b) return 0; const da = new Date(a).getTime(); const db = new Date(b).getTime(); return Math.round((da - db) / (24 * 3600 * 1000)) }
 function renderAlerts() {
   if (alertSevRef.value) {
     const chart = echarts.init(alertSevRef.value)

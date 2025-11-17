@@ -278,18 +278,61 @@ export class ProgressService {
   }
 
   async getContract(projectId: number, wellNumber?: string) {
-    if (!wellNumber) {
-      return null
+    if (wellNumber) {
+      const rec = await this.contractsRepo.findOne({ where: { project: { id: projectId } as any, wellNumber } })
+      if (!rec) return null
+      return {
+        productionTime: Number(rec.productionTime || 0),
+        nonProductionTime: Number(rec.nonProductionTime || 0),
+        completionTime: Number(rec.completionTime || 0),
+        movingPeriod: Number(rec.movingPeriod || 0),
+        wellCompletionPeriod: Number(rec.wellCompletionPeriod || 0),
+        drillingPeriod: Number(rec.drillingPeriod || 0)
+      }
     }
-    const rec = await this.contractsRepo.findOne({ where: { project: { id: projectId } as any, wellNumber } })
-    if (!rec) return null
+    const all = await this.contractsRepo.find({ where: { project: { id: projectId } as any } })
+    if (!all.length) return null
+    const sum = all.reduce((s, r) => ({
+      productionTime: s.productionTime + Number(r.productionTime || 0),
+      nonProductionTime: s.nonProductionTime + Number(r.nonProductionTime || 0),
+      completionTime: s.completionTime + Number(r.completionTime || 0),
+      movingPeriod: s.movingPeriod + Number(r.movingPeriod || 0),
+      wellCompletionPeriod: s.wellCompletionPeriod + Number(r.wellCompletionPeriod || 0),
+      drillingPeriod: s.drillingPeriod + Number(r.drillingPeriod || 0)
+    }), { productionTime: 0, nonProductionTime: 0, completionTime: 0, movingPeriod: 0, wellCompletionPeriod: 0, drillingPeriod: 0 })
+    const n = all.length
     return {
-      productionTime: Number(rec.productionTime || 0),
-      nonProductionTime: Number(rec.nonProductionTime || 0),
-      completionTime: Number(rec.completionTime || 0),
-      movingPeriod: Number(rec.movingPeriod || 0),
-      wellCompletionPeriod: Number(rec.wellCompletionPeriod || 0),
-      drillingPeriod: Number(rec.drillingPeriod || 0)
+      productionTime: Number((sum.productionTime / n).toFixed(2)),
+      nonProductionTime: Number((sum.nonProductionTime / n).toFixed(2)),
+      completionTime: Number((sum.completionTime / n).toFixed(2)),
+      movingPeriod: Number((sum.movingPeriod / n).toFixed(2)),
+      wellCompletionPeriod: Number((sum.wellCompletionPeriod / n).toFixed(2)),
+      drillingPeriod: Number((sum.drillingPeriod / n).toFixed(2))
     }
+  }
+
+  async sixRadar(projectId: number, from?: string, to?: string, wellNumber?: string) {
+    const d = await this.dashboard(projectId, undefined, from, to, wellNumber)
+    const c = await this.getContract(projectId, wellNumber)
+    const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
+    const to2 = (n: number) => Number(n.toFixed(2))
+    const prod = Number(d.drillingProductionTime || 0)
+    const dCycle = Number(d.drillingCycleTime || 0)
+    const dNon = Number(d.drillingNonProductionTime || 0)
+    const comp = Number(d.completionCycleTime || 0)
+    const pure = Number(d.pureDrillingTime || 0)
+    const trip = Number(d.trippingTime || 0)
+    const footage = Number(d.footageWorkingTime || 0)
+    const move = Number(d.movingCycleTime || 0)
+    const prodScore = (() => { if (!c || c.productionTime <= 0) return 0; const diff = Math.abs(prod - c.productionTime) / c.productionTime; return to2(5 * (1 - clamp(diff, 0, 1))) })()
+    const nonScore = (() => { const ratioA = dCycle > 0 ? (dNon / dCycle) : 0; const a = 5 * (1 - clamp(ratioA / 0.02, 0, 1)); const ratioB = c && c.nonProductionTime > 0 ? (dNon / c.nonProductionTime) : 0; const b = 5 * (1 - clamp(ratioB / 1, 0, 1)); return to2(a * 0.35 + b * 0.65) })()
+    const midScore = (() => { if (!c || c.completionTime <= 0) return 0; const r = comp / c.completionTime; return to2(r <= 0.6 ? 5 : 5 * (1 - clamp((r - 0.6) / 0.5, 0, 1))) })()
+    const drillScore = (() => { const r = dCycle > 0 ? (pure / dCycle) : 0; return to2(5 * clamp(r / 0.5, 0, 1)) })()
+    const tripScore = (() => { const r = footage > 0 ? (trip / footage) : 0; return to2(r <= 0.1 ? 5 : 5 * (1 - clamp((r - 0.1) / 0.2, 0, 1))) })()
+    const contractScore = (() => { const moveRate = c && c.movingPeriod > 0 ? (move / c.movingPeriod) : 0; const moveS = moveRate <= 0.6 ? 5 : 5 * (1 - clamp((moveRate - 0.6) / 0.5, 0, 1)); const dDelta = c && c.drillingPeriod > 0 ? clamp((dCycle - c.drillingPeriod) / c.drillingPeriod, 0, 1) : 1; const dS = 5 * (1 - clamp(dDelta / 0.10, 0, 1)); const cDelta = c && c.wellCompletionPeriod > 0 ? clamp((comp - c.wellCompletionPeriod) / c.wellCompletionPeriod, 0, 1) : 1; const cS = 5 * (1 - clamp(cDelta / 0.10, 0, 1)); return to2(moveS * 0.125 + dS * 0.625 + cS * 0.25) })()
+    const scores = { productionRate: prodScore, nonProductionRate: nonScore, midCompletion: midScore, drillingEfficiency: drillScore, trippingEfficiency: tripScore, contractUtilization: contractScore }
+    const overall = Number(((prodScore + nonScore + midScore + drillScore + tripScore + contractScore) / 6).toFixed(2))
+    const ok = Object.values(scores).some(v => Number(v) > 0)
+    return { ok, scores, overall, details: d }
   }
 }

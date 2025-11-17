@@ -183,3 +183,26 @@ export async function getProgressContract(params: { projectId: number; wellNumbe
   if (!res.ok) return null
   return res.json()
 }
+
+export async function getProgressSixRadar(params: { projectId: number; from?: string; to?: string; wellNumber?: string }) {
+  const u = new URL(`/api/dashboard/progress/sixRadar`, window.location.origin)
+  u.searchParams.set('projectId', String(params.projectId))
+  if (params.from) u.searchParams.set('from', params.from)
+  if (params.to) u.searchParams.set('to', params.to)
+  if (params.wellNumber) u.searchParams.set('wellNumber', params.wellNumber)
+  const res = await fetch(u.toString())
+  if (!res.ok) return { ok: false }
+  return res.json()
+}
+
+export async function getRevenueSixRadar(params: { projectId: number; from?: string; to?: string; wellNumber?: string; taskName?: string }) {
+  const u = new URL(`/api/dashboard/revenue/sixRadar`, window.location.origin)
+  u.searchParams.set('projectId', String(params.projectId))
+  if (params.from) u.searchParams.set('from', params.from)
+  if (params.to) u.searchParams.set('to', params.to)
+  if (params.wellNumber) u.searchParams.set('wellNumber', params.wellNumber)
+  if (params.taskName) u.searchParams.set('taskName', params.taskName)
+  const res = await fetch(u.toString())
+  if (!res.ok) return { ok: false }
+  return res.json()
+}
