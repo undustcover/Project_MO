@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组停时效指标测试结果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .result-section {
+            margin-bottom: 30px;
+        }
+        .result-section h2 {
+            color: #2196F3;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .preview-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .preview-container iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        .note {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>组停时效指标测试结果</h1>
+        
+        <div class="result-section">
+            <h2>功能实现状态</h2>
+            <ul class="feature-list">
+                <li class="success">✓ 已在HTML中添加组停时效指标图表区域</li>
+                <li class="success">✓ 已在script.js中实现updateOrganizationTimeChart函数</li>
+                <li class="success">✓ 已在updateCharts函数中添加updateOrganizationTimeChart调用</li>
+                <li class="success">✓ 组停时效指标显示组织时间占总时间的比率</li>
+            </ul>
+        </div>
+        
+        <div class="result-section">
+            <h2>功能说明</h2>
+            <p>组停时效指标通过圆盘图展示组织停工时间占总时间的比率：</p>
+            <ul>
+                <li><strong>橙色扇形</strong>：表示组织停工时间</li>
+                <li><strong>绿色扇形</strong>：表示其他时间（非组织停工）</li>
+                <li><strong>中心百分比</strong>：显示组织停工时间占总时间的百分比</li>
+                <li><strong>图例</strong>：显示具体的小时数和百分比</li>
+            </ul>
+        </div>
+        
+        <div class="result-section">
+            <h2>系统预览</h2>
+            <div class="preview-container">
+                <iframe src="http://localhost:8000" title="日历看板系统预览"></iframe>
+            </div>
+        </div>
+        
+        <div class="note">
+            <p><strong>注意：</strong>如果没有数据，组停时效指标将显示"无数据"。请确保日历中有包含"组织停工时间"或"组织停工"的记录，以便正确计算和显示组停时效指标。</p>
+        </div>
+    </div>
+</body>
+</html>

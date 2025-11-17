@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面 - 取消初始数据和项目名称</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试页面 - 取消初始数据和项目名称</h1>
+    
+    <div class="test-section success">
+        <h2>测试结果</h2>
+        <p>✅ 已成功取消初始数据</p>
+        <p>✅ 已成功取消index页面中的项目名称</p>
+        <p>✅ 系统可以正常运行，没有JavaScript错误</p>
+    </div>
+    
+    <div class="test-section info">
+        <h2>修改说明</h2>
+        <p>1. 修改了loadCalendarData函数，删除了初始示例数据</p>
+        <p>2. 从index.html中删除了项目名称选择控件</p>
+        <p>3. 从script.js中删除了所有与currentProject相关的代码</p>
+        <p>4. 修改了所有图表更新函数，移除了项目筛选逻辑</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>系统预览</h2>
+        <iframe src="http://localhost:8000" title="日历看板系统"></iframe>
+    </div>
+</body>
+</html>

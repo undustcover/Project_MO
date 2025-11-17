@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目时间维度统计分析</title>
+    <script src="./libs/xlsx.full.min.js"></script>
+    <script src="./libs/chart.min.js"></script>
+    <script src="./libs/html2pdf.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <header class="page-header">
+            <h1>项目进度维度统计分析</h1>
+        </header>
+        
+        <!-- 项目信息看板 -->
+        <div class="project-info-board">
+            <h2 class="board-title">厄瓜多尔12和31区块PEC9口井钻完井一体化项目</h2>
+            <div class="info-cards-container">
+                <!-- 基本信息卡片 -->
+                <div class="info-card basic-info">
+                    <div class="card-header">
+                        <h3>基本信息</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">合同编号:</span>
+                            <span class="info-value">Nro. 2025246</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同周期:</span>
+                            <span class="info-value">2025.06.20～2026.06.19</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工作量:</span>
+                            <span class="info-value">9口井</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同金额:</span>
+                            <span class="info-value">$46,248,681.6</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 时间节点卡片 -->
+                <div class="info-card timeline-info">
+                    <div class="card-header">
+                        <h3>时间节点</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">开工日期:</span>
+                            <span class="info-value">2025/9/5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">合同验收合格日期:</span>
+                            <span class="info-value">2026/5/23</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">尾款到账日期:</span>
+                            <span class="info-value">2026/6/25</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">保函释放日期:</span>
+                            <span class="info-value">2026/7/29</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">总结复盘日期:</span>
+                            <span class="info-value">2026/6/27</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 参与单位卡片 -->
+                <div class="info-card participants-info">
+                    <div class="card-header">
+                        <h3>参与单位</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">运营主体：</span>
+                            <span class="info-value">国际工程公司</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">厄瓜多尔分公司：</span>
+                            <span class="info-value">后勤支持保障</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">CCDC-28队：</span>
+                            <span class="info-value">钻井主体</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">项目长：</span>
+                            <span class="info-value">曲学东</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"></span>
+                            <span class="info-value"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分包单位卡片 -->
+                <div class="info-card subcontractors-info">
+                    <div class="card-header">
+                        <h3>分包单位</h3>
+                        <div class="card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <span class="info-label">当地租赁:</span>
+                            <span class="info-value">野营房、车辆</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当地购买:</span>
+                            <span class="info-value">灭火器</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当地分包:</span>
+                            <span class="info-value">安保、生活服务、重载运输、通讯</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 控制区域 -->
+        <div class="control-panel">
+            <div class="control-item">
+                <label for="year-select">年份选择:</label>
+                <select id="year-select"></select>
+            </div>
+            <div class="control-item">
+                <label for="month-select">月份选择:</label>
+                <select id="month-select">
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="well-number-select">井号筛选:</label>
+                <select id="well-number-select">
+                    <option value="">全部井号</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <button id="refresh-btn">刷新</button>
+                <button id="export-btn">导出Excel</button>
+                <button id="import-btn">导入Excel</button>
+                <button id="pdf-export-btn">导出PDF</button>
+                <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;">
+            </div>
+        </div>
+
+        <!-- 合同指标输入区域 -->
+        <div class="contract-panel">
+            <h3>合同指标录入</h3>
+            <div class="contract-inputs">
+                <div class="contract-input-group">
+                    <label for="contract-production-time">合同生产时间(小时):</label>
+                    <input type="number" id="contract-production-time" min="0" step="0.1" placeholder="请输入合同生产时间">
+                </div>
+                <div class="contract-input-group">
+                    <label for="contract-non-production-time">合同非生产时间(小时):</label>
+                    <input type="number" id="contract-non-production-time" min="0" step="0.1" placeholder="请输入合同非生产时间">
+                </div>
+                <div class="contract-input-group">
+                    <label for="contract-completion-time">合同中完时间(小时):</label>
+                    <input type="number" id="contract-completion-time" min="0" step="0.1" placeholder="请输入合同中完时间">
+                </div>
+                <div class="contract-input-group">
+                    <label for="contract-moving-period">合同搬家周期(小时):</label>
+                    <input type="number" id="contract-moving-period" min="0" step="0.1" placeholder="请输入合同搬家周期">
+                </div>
+                <div class="contract-input-group">
+                    <label for="contract-well-completion-period">合同完井周期(小时):</label>
+                    <input type="number" id="contract-well-completion-period" min="0" step="0.1" placeholder="请输入合同完井周期">
+                </div>
+                <div class="contract-input-group">
+                    <label for="contract-drilling-period">合同钻井周期(小时):</label>
+                    <input type="number" id="contract-drilling-period" min="0" step="0.1" placeholder="请输入合同钻井周期">
+                </div>
+                <div class="contract-input-group">
+                    <button id="calculate-btn" class="calculate-button">开始计算</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 雷达图与评分详情统一卡片 -->
+        <div class="radar-card">
+            <div class="radar-card-header">
+                <h3>六维雷达与评分详情</h3>
+            </div>
+            <div class="radar-card-content">
+                <div class="radar-chart-container">
+                    <h3>六维雷达图</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="radar-chart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                <div class="indicators-container">
+                    <h3>六维评分详情</h3>
+                    <div class="indicator-item">
+                        <div class="indicator-name">生产时间达成率(分)</div>
+                        <div class="indicator-formula">|生产时间-合同生产时间|/合同生产时间×100%</div>
+                        <div class="indicator-value" id="production-rate-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="production-rate-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="indicator-item">
+                        <div class="indicator-name">非生产时效控制率(分)</div>
+                        <div class="indicator-formula">A得分(非生产时效占比)×0.35+B得分(非生产时间合同符合率)×0.65</div>
+                        <div class="indicator-value" id="non-production-rate-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="non-production-rate-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="indicator-item">
+                        <div class="indicator-name">中完时间达成率(分)</div>
+                        <div class="indicator-formula">实际中完时间÷合同中完时间×100%</div>
+                        <div class="indicator-value" id="completion-rate-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="completion-rate-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="indicator-item">
+                        <div class="indicator-name">纯钻时效(分)</div>
+                        <div class="indicator-formula">纯钻时间/(钻井周期内的生产时间+非生产时间)×100%</div>
+                        <div class="indicator-value" id="drilling-efficiency-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="drilling-efficiency-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="indicator-item">
+                        <div class="indicator-name">起下钻时效(分)</div>
+                        <div class="indicator-formula">(工况二级时效字段为进尺工作时间下的起下钻时间之和)/进尺工作时间×100%</div>
+                        <div class="indicator-value" id="tripping-efficiency-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="tripping-efficiency-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="indicator-item">
+                        <div class="indicator-name">合同时间利用率(分)</div>
+                        <div class="indicator-formula">A×0.125+B×0.625+C×0.25 (A:搬安时间利用率, B:钻井时间利用率, C:完井时间利用率)</div>
+                        <div class="indicator-value" id="contract-utilization-value">-</div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="contract-utilization-progress">未计算</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务整体评价区域 -->
+        <div class="overall-evaluation">
+            <div class="evaluation-header">
+                <h3>任务整体评价</h3>
+                <div class="evaluation-badge" id="evaluation-badge">未计算</div>
+            </div>
+            <div class="evaluation-content">
+                <div class="score-card">
+                    <div class="score-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="score-content">
+                        <div class="score-label">综合得分</div>
+                        <div class="score-value" id="overall-score">-</div>
+                        <div class="score-standards">
+                            <div class="standard-item excellent-plus">≥4.5 优秀+</div>
+                            <div class="standard-item excellent">≥3.5 优秀</div>
+                            <div class="standard-item good-plus">≥2.5 良好+</div>
+                            <div class="standard-item good">≥1.5 良好</div>
+                            <div class="standard-item average">≥0.5 一般</div>
+                            <div class="standard-item poor">&lt;0.5 不及格</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-card">
+                    <div class="level-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="level-content">
+                        <div class="level-label">评价等级</div>
+                        <div class="level-value" id="evaluation-level">未计算</div>
+                    </div>
+                </div>
+                <div class="description-card">
+                    <div class="description-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="description-content">
+                        <div class="description-label">评价说明</div>
+                        <div class="description-value" id="evaluation-description">请先输入合同指标并点击"开始计算"按钮</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务改进建议区域 -->
+        <div class="improvement-suggestions">
+            <div class="suggestions-header">
+                <h3>任务改进建议</h3>
+                <div class="suggestions-badge" id="suggestions-badge">待补充</div>
+            </div>
+            <div class="suggestions-content">
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">生产时间达成率改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对生产时间达成率的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">非生产时效控制率改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对非生产时效控制率的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">中完时间达成率改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对中完时间达成率的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">纯钻时效改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对纯钻时效的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">起下钻时效改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对起下钻时效的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="suggestion-content">
+                        <div class="suggestion-title">合同时间利用率改进建议</div>
+                        <div class="suggestion-text" contenteditable="true" data-placeholder="请输入针对合同时间利用率的改进建议（150-300字）..."></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务进度对比图 -->
+        <div class="progress-comparison">
+            <div class="progress-header">
+                <h3>任务进度对比图</h3>
+                <div class="progress-badge" id="progress-badge">计划与实际对比</div>
+            </div>
+            <div class="progress-content">
+                <div class="progress-table-container">
+                    <table class="progress-table" id="progress-table">
+                        <thead>
+                            <tr>
+                                <th>任务名称</th>
+                                <th>计划开始时间</th>
+                                <th>计划完成时间</th>
+                                <th>实际开始时间</th>
+                                <th>实际完成时间</th>
+                                <th>完成时间对比(天)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>搬家安装</td>
+                                <td>2025.7.23</td>
+                                <td>2025.9.1</td>
+                                <td>2025.7.23</td>
+                                <td>2025.9.7</td>
+                                <td class="delay">-6</td>
+                            </tr>
+                            <tr>
+                                <td>一开钻进</td>
+                                <td>2025.9.1</td>
+                                <td>2025.9.9</td>
+                                <td>2025.9.7</td>
+                                <td>2025.9.11</td>
+                                <td class="delay">-2</td>
+                            </tr>
+                            <tr>
+                                <td>一开中完</td>
+                                <td>2025.9.9</td>
+                                <td>2025.9.13</td>
+                                <td>2025.9.11</td>
+                                <td>2025.9.15</td>
+                                <td class="delay">-2</td>
+                            </tr>
+                            <tr>
+                                <td>二开钻进</td>
+                                <td>2025.9.13</td>
+                                <td>2025.9.20</td>
+                                <td>2025.9.15</td>
+                                <td>2025.9.17</td>
+                                <td class="ahead">+3</td>
+                            </tr>
+                            <tr>
+                                <td>二开中完</td>
+                                <td>2025.9.20</td>
+                                <td>2025.9.22</td>
+                                <td>2025.9.17</td>
+                                <td>2025.9.21</td>
+                                <td class="ahead">+1</td>
+                            </tr>
+                            <tr>
+                                <td>三开钻进</td>
+                                <td>2025.9.22</td>
+                                <td>2025.9.25</td>
+                                <td>2025.9.21</td>
+                                <td>2025.9.24</td>
+                                <td class="ahead">+1</td>
+                            </tr>
+                            <tr>
+                                <td>完井作业</td>
+                                <td>2025.9.25</td>
+                                <td>2025.9.26</td>
+                                <td>2025.9.24</td>
+                                <td>2025.9.27</td>
+                                <td class="ahead">+1</td>
+                            </tr>
+                            <tr>
+                                <td>试油作业</td>
+                                <td>2025.9.26</td>
+                                <td>2025.10.4</td>
+                                <td>2025.9.27</td>
+                                <td>2025.10.4</td>
+                                <td class="on-time">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="progress-chart-container">
+                    <div class="chart-wrapper">
+                        <canvas id="progress-comparison-chart" width="800" height="400"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #4a6cf7;"></span>
+                            <span>计划时间</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #ff6b6b;"></span>
+                            <span>实际时间</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计图表区域 -->
+        <div class="charts-container">
+            <div class="chart-box">
+                <h3>建井周期统计</h3>
+                <div class="chart-container">
+                    <canvas id="well-cycle-chart" width="300" height="300"></canvas>
+                    <div id="well-cycle-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>工作时效统计</h3>
+                <div class="chart-container">
+                    <canvas id="work-time-chart" width="300" height="300"></canvas>
+                    <div id="work-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>生产时效统计</h3>
+                <div class="chart-container">
+                    <canvas id="production-time-chart" width="300" height="300"></canvas>
+                    <div id="production-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>进尺工作时间统计</h3>
+                <div class="chart-container">
+                    <canvas id="drilling-time-chart" width="300" height="300"></canvas>
+                    <div id="drilling-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>非生产时效统计</h3>
+                <div class="chart-container">
+                    <canvas id="non-production-time-chart" width="300" height="300"></canvas>
+                    <div id="non-production-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>动拆搬安时效统计</h3>
+                <div class="chart-container">
+                    <canvas id="moving-time-chart" width="300" height="300"></canvas>
+                    <div id="moving-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>组停时效指标</h3>
+                <div class="chart-container">
+                    <canvas id="organization-time-chart" width="300" height="300"></canvas>
+                    <div id="organization-time-legend" class="chart-legend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日历主体 -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="weekday">周日</div>
+                <div class="weekday">周一</div>
+                <div class="weekday">周二</div>
+                <div class="weekday">周三</div>
+                <div class="weekday">周四</div>
+                <div class="weekday">周五</div>
+                <div class="weekday">周六</div>
+            </div>
+            <div class="calendar-body" id="calendar-body">
+                <!-- 日历内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 提示信息 -->
+        <div class="toast" id="toast"></div>
+        
+        <!-- 页脚署名 -->
+        <footer class="page-footer">
+            <p>川庆国际项目运营管理部@HugoXu</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

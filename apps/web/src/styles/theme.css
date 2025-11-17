@@ -1,0 +1,4 @@
+:root { --brand: #409eff; }
+html, body { margin: 0; padding: 0; }
+.el-menu { border-right: 0; }
+.el-card__header { font-weight: 600; }
