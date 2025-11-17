@@ -6,6 +6,7 @@ const ProjectGoals = () => import('../pages/projects/ProjectGoals.vue')
 const ProgressDashboard = () => import('../pages/progress/ProgressDashboard.vue')
 const CostDashboard = () => import('../pages/cost/CostDashboard.vue')
 const RevenueDashboard = () => import('../pages/revenue/RevenueDashboard.vue')
+const ProjectTracking = () => import('../pages/tracking/ProjectTracking.vue')
 const AlertsBoard = () => import('../pages/alerts/AlertsBoard.vue')
 const AlertsConfigPage = () => import('../pages/alerts/AlertsConfigPage.vue')
 const HomeDashboard = () => import('../pages/home/HomeDashboard.vue')
@@ -22,6 +23,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/progress', component: ProgressDashboard },
   { path: '/cost', component: CostDashboard },
   { path: '/revenue', component: RevenueDashboard },
+  { path: '/tracking', component: ProjectTracking },
   { path: '/alerts', component: AlertsBoard }
   ,{ path: '/alerts/configs', component: AlertsConfigPage }
 ]

@@ -206,3 +206,19 @@ export async function getRevenueSixRadar(params: { projectId: number; from?: str
   if (!res.ok) return { ok: false }
   return res.json()
 }
+
+export async function getTrackingSummary(projectId: number) {
+  const u = new URL(`/api/dashboard/tracking/summary`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  const res = await fetch(u.toString())
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function getTrackingTable(projectId: number) {
+  const u = new URL(`/api/dashboard/tracking/table`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  const res = await fetch(u.toString())
+  if (!res.ok) return { rows: [] }
+  return res.json()
+}

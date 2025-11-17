@@ -13,6 +13,7 @@
           <el-menu-item index="/progress">进度</el-menu-item>
           <el-menu-item index="/cost">成本</el-menu-item>
           <el-menu-item index="/revenue">收入</el-menu-item>
+          <el-menu-item index="/tracking">项目跟踪</el-menu-item>
           <el-menu-item index="/alerts">预警</el-menu-item>
         </el-menu>
         <div class="aside-footer">川庆国际项目运营管理部</div>
