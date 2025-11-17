@@ -52,4 +52,7 @@ export class Project {
 
   @OneToMany(() => ProjectGoal, g => g.project)
   goals: ProjectGoal[]
+
+  @Column({ type: 'simple-json', nullable: true })
+  homeConfig?: any
 }

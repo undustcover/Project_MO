@@ -73,4 +73,17 @@ export class ProjectsService {
     await this.projectsRepo.delete(id)
     return { success: true }
   }
+
+  async getHomeConfig(id: number) {
+    const p = await this.projectsRepo.findOne({ where: { id } })
+    return p?.homeConfig || null
+  }
+
+  async setHomeConfig(id: number, cfg: any) {
+    const p = await this.projectsRepo.findOne({ where: { id } })
+    if (!p) return { ok: false, error: 'Project not found' }
+    p.homeConfig = cfg || null
+    await this.projectsRepo.save(p)
+    return { ok: true }
+  }
 }

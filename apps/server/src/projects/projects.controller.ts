@@ -33,4 +33,14 @@ export class ProjectsController {
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id))
   }
+
+  @Get(':id/home-config')
+  getHomeConfig(@Param('id') id: string) {
+    return this.service.getHomeConfig(Number(id))
+  }
+
+  @Put(':id/home-config')
+  setHomeConfig(@Param('id') id: string, @Body() body: any) {
+    return this.service.setHomeConfig(Number(id), body)
+  }
 }

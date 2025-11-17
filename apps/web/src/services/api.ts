@@ -42,6 +42,24 @@ export async function deleteProject(id: number) {
   return res.ok
 }
 
+export async function getProjectHomeConfig(projectId: number) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/home-config`)
+  if (!res.ok) return null
+  const text = await res.text()
+  if (!text) return null
+  try { return JSON.parse(text) } catch { return null }
+}
+
+export async function setProjectHomeConfig(projectId: number, config: any) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/home-config`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config)
+  })
+  const d = await res.json().catch(() => ({ ok: res.ok }))
+  return !!(d?.ok)
+}
+
 export async function getProjectGoals(projectId: number) {
   const res = await fetch(`${BASE_URL}/projects/${projectId}/goals`)
   if (!res.ok) return []

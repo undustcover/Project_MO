@@ -4,6 +4,7 @@
       <el-aside width="260px" class="app-aside">
         <div class="brand">项目管理系统</div>
         <el-menu :default-openeds="['1']" router>
+          <el-menu-item index="/home">主页</el-menu-item>
           <el-sub-menu index="1">
             <template #title>项目</template>
             <el-menu-item index="/projects">项目列表</el-menu-item>
