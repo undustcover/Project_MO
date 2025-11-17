@@ -73,6 +73,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { createProject } from '../../services/api'
 const formRef = ref()
@@ -103,6 +104,7 @@ function addKV(list: Array<{ key: string; value: string }>) {
 function removeKV(list: Array<{ key: string; value: string }>, idx: number) {
   list.splice(idx, 1)
 }
+const router = useRouter()
 async function submit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -124,7 +126,13 @@ async function submit() {
   }
   const res = await createProject(payload)
   if (res.ok) {
-    ElMessage.success('提交成功')
+    const id = (res.body && res.body.id) ? Number(res.body.id) : 0
+    if (id) {
+      ElMessage.success('项目已创建，请设定项目目标')
+      router.push(`/projects/${id}/goals`)
+    } else {
+      ElMessage.success('提交成功')
+    }
   } else {
     const msg = typeof res.body === 'string' ? res.body : (res.body?.message || '')
     ElMessage.error(`提交失败${res.status ? '（'+res.status+'）' : ''}${msg ? '：'+msg : ''}`)

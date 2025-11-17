@@ -5,7 +5,7 @@
     </template>
     <div class="toolbar">
       <el-select v-model="projectId" placeholder="选择项目" filterable style="width:300px" @change="onProjectChange">
-        <el-option v-for="p in projects" :key="p.id" :label="p.contractNo + '（' + (p.workloadText||'') + '）'" :value="p.id" />
+        <el-option v-for="p in projects" :key="p.id" :label="(p.name || p.contractNo)" :value="p.id" />
       </el-select>
       <el-select v-model="wellNumber" placeholder="选择井号（可选）" clearable class="ml8" style="width:200px" @change="load">
         <el-option v-for="w in wells" :key="w" :label="w" :value="w" />

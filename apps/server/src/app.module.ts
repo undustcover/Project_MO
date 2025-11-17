@@ -6,6 +6,7 @@ import { ProgressModule } from './progress/progress.module'
 import { CostModule } from './cost/cost.module'
 import { RevenueModule } from './revenue/revenue.module'
 import { AlertsModule } from './alerts/alerts.module'
+import { ProjectGoalsModule } from './project-goals/project-goals.module'
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { AlertsModule } from './alerts/alerts.module'
     ProgressModule,
     CostModule,
     RevenueModule,
-    AlertsModule
+    AlertsModule,
+    ProjectGoalsModule
   ]
 })
 export class AppModule {}

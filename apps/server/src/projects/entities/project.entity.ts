@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { Participant } from './participant.entity'
 import { Subcontractor } from './subcontractor.entity'
+import { ProjectGoal } from '../../project-goals/entities/project-goal.entity'
 
 @Entity('projects')
 export class Project {
@@ -48,4 +49,7 @@ export class Project {
 
   @OneToMany(() => Subcontractor, s => s.project, { cascade: true })
   subcontractors: Subcontractor[]
+
+  @OneToMany(() => ProjectGoal, g => g.project)
+  goals: ProjectGoal[]
 }

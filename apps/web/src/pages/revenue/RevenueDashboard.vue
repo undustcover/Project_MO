@@ -3,7 +3,7 @@
     <template #header><div class="card-header">收入仪表盘</div></template>
     <div class="toolbar">
       <el-select v-model="projectId" placeholder="选择项目" filterable style="width:300px" @change="load">
-        <el-option v-for="p in projects" :key="p.id" :label="p.contractNo" :value="p.id" />
+        <el-option v-for="p in projects" :key="p.id" :label="(p.name || p.contractNo)" :value="p.id" />
       </el-select>
       <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" class="ml8" />
       <el-select v-model="wellNumber" placeholder="选择井号（必选）" clearable class="ml8" style="width:200px" @change="onWellChange">

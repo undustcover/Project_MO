@@ -42,6 +42,33 @@ export async function deleteProject(id: number) {
   return res.ok
 }
 
+export async function getProjectGoals(projectId: number) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/goals`)
+  if (!res.ok) return []
+  return res.json()
+}
+
+export async function setProjectGoals(projectId: number, goals: Array<{ dimension: string; indicatorKey: string; comparator?: string; targetValue: number; unit?: string; wellNumber?: string; taskName?: string }>) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/goals`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(goals)
+  })
+  return res.ok
+}
+
+export async function getProjectGoalsSummary(projectId: number) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/goals/summary`)
+  if (!res.ok) return { total: 0, completed: 0, unsupported: 0 }
+  return res.json()
+}
+
+export async function evaluateProjectGoals(projectId: number) {
+  const res = await fetch(`${BASE_URL}/projects/${projectId}/goals/evaluate`)
+  if (!res.ok) return { results: [], summary: { total: 0, completed: 0, unsupported: 0 } }
+  return res.json()
+}
+
 export async function getProgressDashboard(params: { projectId: number; taskName?: string; from?: string; to?: string; wellNumber?: string }) {
   const u = new URL(`/api/dashboard/progress`, window.location.origin)
   u.searchParams.set('projectId', String(params.projectId))

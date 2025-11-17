@@ -15,10 +15,17 @@
       <el-table-column prop="contractEnd" label="结束" width="120" />
       <el-table-column prop="workloadText" label="工作量" width="160" />
       <el-table-column prop="amountValue" label="合同金额" width="140" />
+      <el-table-column label="目标完成" width="160">
+        <template #default="scope">
+          <span v-if="summaries[scope.row.id]">已完成 {{ summaries[scope.row.id].completed }}/{{ summaries[scope.row.id].total }}</span>
+          <span v-else>--</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="260">
         <template #default="scope">
           <div class="ops">
             <el-button size="small" type="primary" plain @click="$router.push('/projects/' + scope.row.id)">查看</el-button>
+            <el-button size="small" type="success" plain @click="$router.push('/projects/' + scope.row.id + '/goals')">目标</el-button>
             <el-button size="small" type="success" plain @click="$router.push('/progress')">进度</el-button>
             <el-button size="small" type="warning" plain @click="openEdit(scope.row)">编辑</el-button>
             <el-button size="small" type="danger" plain @click="confirmDelete(scope.row)">删除</el-button>
@@ -32,12 +39,15 @@
         <el-form-item label="项目名称">
           <el-input v-model="editForm.name" />
         </el-form-item>
-        <el-form-item label="合同编号">
-          <el-input v-model="editForm.contractNo" />
-        </el-form-item>
-        <el-form-item label="工作量">
-          <el-input v-model="editForm.workloadText" />
-        </el-form-item>
+      <el-form-item label="合同编号">
+        <el-input v-model="editForm.contractNo" />
+      </el-form-item>
+      <el-form-item label="合同周期">
+        <el-date-picker v-model="editForm.contractRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" />
+      </el-form-item>
+      <el-form-item label="工作量">
+        <el-input v-model="editForm.workloadText" />
+      </el-form-item>
         <el-form-item label="合同金额">
           <el-input-number v-model="editForm.amountValue" :min="0" :step="0.01" />
           <el-select v-model="editForm.amountCurrency" class="ml8" style="width:120px">
@@ -91,10 +101,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getProjects, updateProject, deleteProject } from '../../services/api'
+import { getProjects, updateProject, deleteProject, getProjectGoalsSummary } from '../../services/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 const rows = ref<any[]>([])
 const keyword = ref('')
+const summaries = ref<Record<number, { total: number; completed: number; unsupported: number }>>({})
 const filtered = computed(() => {
   const k = keyword.value.trim()
   if (!k) return rows.value
@@ -103,6 +114,10 @@ const filtered = computed(() => {
 async function fetch() {
   const data = await getProjects()
   rows.value = Array.isArray(data) ? data : []
+  const map: Record<number, { total: number; completed: number; unsupported: number }> = {}
+  const tasks = rows.value.map(async r => { map[r.id] = await getProjectGoalsSummary(r.id) })
+  await Promise.all(tasks)
+  summaries.value = map
 }
 onMounted(fetch)
 
@@ -114,6 +129,7 @@ function openEdit(row: any) {
   editForm.value = {
     name: row.name || '',
     contractNo: row.contractNo || '',
+    contractRange: [row.contractStart || '', row.contractEnd || ''],
     workloadText: row.workloadText || '',
     amountValue: row.amountValue ?? 0,
     amountCurrency: row.amountCurrency || 'CNY',
@@ -129,7 +145,13 @@ function openEdit(row: any) {
 }
 async function saveEdit() {
   const payload = {
-    ...editForm.value,
+    name: editForm.value.name,
+    contractNo: editForm.value.contractNo,
+    contractStart: editForm.value.contractRange?.[0] || undefined,
+    contractEnd: editForm.value.contractRange?.[1] || undefined,
+    workloadText: editForm.value.workloadText,
+    amountValue: editForm.value.amountValue,
+    amountCurrency: editForm.value.amountCurrency,
     startDate: editForm.value.startDate || undefined,
     acceptanceDate: editForm.value.acceptanceDate || undefined,
     finalPaymentDate: editForm.value.finalPaymentDate || undefined,
