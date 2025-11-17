@@ -194,6 +194,8 @@ const level2PieRef = ref<HTMLDivElement | null>(null)
 let level2PieChart: echarts.ECharts | null = null
 const dimension = ref<'level2' | 'level3'>('level3')
 const isLoading = ref(false)
+let loadTimer: any = null
+function scheduleLoad() { if (loadTimer) clearTimeout(loadTimer); loadTimer = setTimeout(() => { load() }, 200) }
 
 // 提前声明，供下方度量和评分计算使用
 const taskDetail = ref<any>(null)
@@ -226,10 +228,7 @@ async function load() {
       footageWorkingTime: 0,
       wellBuildingCycleTime: 0
     }
-    await loadCycleDetail()
-    await loadCycleBreakdown()
-    await loadPlanCompare()
-    await loadContract()
+    await Promise.all([loadCycleDetail(), loadCycleBreakdown(), loadPlanCompare(), loadContract()])
   } finally {
     isLoading.value = false
     await nextTick()
@@ -488,7 +487,7 @@ async function loadCycleDetail() {
   taskDetail.value = d
   taskRows.value = d?.breakdown || []
 }
-watch(cycle, async () => { await load(); calculate() })
+watch(cycle, async () => { scheduleLoad(); calculate() })
 
 function renderBar() {
   if (!barRef.value) return
@@ -610,9 +609,9 @@ function updateUploadUrl() {
   planUploadUrl.value = `/api/dashboard/progress/plan/import?projectId=${projectId.value || ''}`
   contractUploadUrl.value = `/api/dashboard/progress/contract/import?projectId=${projectId.value || ''}`
 }
-watch(projectId, async () => { updateUploadUrl(); await loadWells(); await load() })
-watch(wellNumber, async () => { await load() })
-watch(dateRange, async () => { await load() })
+watch(projectId, async () => { updateUploadUrl(); await loadWells(); scheduleLoad() })
+watch(wellNumber, async () => { scheduleLoad() })
+watch(dateRange, async () => { scheduleLoad() })
 function onImportSuccess(res: any) {
   if (res?.ok) {
     ElMessage.success(`导入成功：${res.count} 条`)

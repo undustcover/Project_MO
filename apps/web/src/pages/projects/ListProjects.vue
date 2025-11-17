@@ -21,14 +21,28 @@
           <span v-else>--</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="260">
+      <el-table-column label="操作" width="320" fixed="right">
         <template #default="scope">
-          <div class="ops">
+          <div class="ops-full">
             <el-button size="small" type="primary" plain @click="$router.push('/projects/' + scope.row.id)">查看</el-button>
             <el-button size="small" type="success" plain @click="$router.push('/projects/' + scope.row.id + '/goals')">目标</el-button>
             <el-button size="small" type="success" plain @click="$router.push('/progress')">进度</el-button>
             <el-button size="small" type="warning" plain @click="openEdit(scope.row)">编辑</el-button>
             <el-button size="small" type="danger" plain @click="confirmDelete(scope.row)">删除</el-button>
+          </div>
+          <div class="ops-more">
+            <el-dropdown>
+              <el-button size="small">更多</el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="$router.push('/projects/' + scope.row.id)">查看</el-dropdown-item>
+                  <el-dropdown-item @click="$router.push('/projects/' + scope.row.id + '/goals')">目标</el-dropdown-item>
+                  <el-dropdown-item @click="$router.push('/progress')">进度</el-dropdown-item>
+                  <el-dropdown-item @click="openEdit(scope.row)">编辑</el-dropdown-item>
+                  <el-dropdown-item @click="confirmDelete(scope.row)">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </template>
       </el-table-column>
@@ -194,7 +208,12 @@ async function confirmDelete(row: any) {
 .page-card { max-width: 1024px; margin: 0 auto; }
 .toolbar { margin-bottom: 12px; display: flex; align-items: center; }
 .ml8 { margin-left: 8px; }
-.ops { display: flex; gap: 8px; }
+.ops-full { display: flex; gap: 8px; flex-wrap: wrap; }
+.ops-more { display: none; }
+@media (max-width: 768px) {
+  .ops-full { display: none; }
+  .ops-more { display: block; }
+}
 .kv-list { padding: 8px 0; }
 .kv-row { display: flex; align-items: center; margin-bottom: 8px; }
 </style>
