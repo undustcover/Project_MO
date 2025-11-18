@@ -200,7 +200,7 @@ export class TrackingController {
   async listFocus(@Query('projectId') projectId: string) { return this.service.listFocus(Number(projectId)) }
 
   @Get('focus/template')
-  focusTemplate(@Res() res: Response) {
+  async focusTemplate(@Res() res: Response, @Query('projectId') projectId?: string) {
     const header = [
       '项目名称',
       '工作量（口）',
@@ -212,8 +212,29 @@ export class TrackingController {
       '今年预计完成工作量'
     ]
     const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.aoa_to_sheet([header])
+    const rows: any[] = [header]
+    if (projectId) {
+      const data = await this.service.listFocus(Number(projectId))
+      for (const r of (data.rows || [])) {
+        const name = String(r.projectName || '').trim()
+        if (!name) continue
+        rows.push([name, '', '', '', '', '', '', ''])
+      }
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows)
     XLSX.utils.book_append_sheet(wb, ws, '模板')
+    if (projectId) {
+      const mapRows: any[] = [['项目名称', '合同编号']]
+      const data = await this.service.listFocus(Number(projectId))
+      for (const r of (data.rows || [])) {
+        const name = String(r.projectName || '').trim()
+        const cn = String(r.contractNo || '').trim()
+        if (!name) continue
+        mapRows.push([name, cn])
+      }
+      const ws2 = XLSX.utils.aoa_to_sheet(mapRows)
+      XLSX.utils.book_append_sheet(wb, ws2, '参考项目')
+    }
     const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer
     res.setHeader('Cache-Control', 'no-cache')
     res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -253,18 +274,31 @@ export class TrackingController {
       const dtRaw = r[4]
       if (!pnRaw) details.push({ row: i + 1, colIndex: 0, colName: '项目名称', cell: `${toCol(0)}${i + 1}`, reason: '项目名称不能为空' })
       if (wlRaw != null && wlRaw !== '' && isNaN(Number(wlRaw))) details.push({ row: i + 1, colIndex: 1, colName: '工作量（口）', cell: `${toCol(1)}${i + 1}`, reason: '数字格式错误' })
-      const normEst = (() => { let s = String(estRaw || '').trim(); if (!s) return undefined; s = s.replace(/[.:/]/g, '-'); const d = new Date(s); if (isNaN(d.getTime())) return undefined; const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}` })()
+      const normEst = (() => {
+        if (typeof estRaw === 'number') {
+          const d = new Date((estRaw - 25569) * 86400 * 1000)
+          const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0')
+          return `${y}-${m}-${da}`
+        }
+        let s = String(estRaw || '').trim(); if (!s) return undefined; s = s.replace(/[.:/]/g, '-')
+        if (/^\d+$/.test(s)) { const num = Number(s); const d = new Date((num - 25569) * 86400 * 1000); const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}` }
+        const d = new Date(s); if (isNaN(d.getTime())) return undefined; const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`
+      })()
       if (estRaw != null && estRaw !== '' && !normEst) details.push({ row: i + 1, colIndex: 3, colName: '预计开钻时间', cell: `${toCol(3)}${i + 1}`, reason: '日期格式错误(YYYY:MM:DD)' })
       const normDT = (() => {
+        if (typeof dtRaw === 'number') {
+          const d = new Date((dtRaw - 25569) * 86400 * 1000)
+          const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0'); const hh = String(d.getHours()).padStart(2, '0'); const mm = String(d.getMinutes()).padStart(2, '0'); const ss = String(d.getSeconds()).padStart(2, '0')
+          return `${y}-${m}-${da} ${hh}:${mm}:${ss}`
+        }
         let s = String(dtRaw || '').trim()
         if (!s) return undefined
-        s = s.replace(/[:]/g, '-').replace(/^(.{10})-/, '$1 ')
-        const d = new Date(s)
-        if (isNaN(d.getTime())) return undefined
-        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0'); const hh = String(d.getHours()).padStart(2, '0'); const mm = String(d.getMinutes()).padStart(2, '0')
-        return `${y}-${m}-${da} ${hh}:${mm}`
+        const m = s.match(/^(\d{4})[:\-](\d{2})[:\-](\d{2})\s+(\d{2})[:\-](\d{2})(?::(\d{2}))?$/)
+        if (!m) return undefined
+        const [_, yy, MM, DD, hh, mm, ss] = m
+        return `${yy}-${MM}-${DD} ${hh}:${mm}:${ss || '00'}`
       })()
-      if (dtRaw != null && dtRaw !== '' && !normDT) details.push({ row: i + 1, colIndex: 4, colName: '首井开钻时间', cell: `${toCol(4)}${i + 1}`, reason: '日期时间格式错误(YYYY:MM:DD:hh:mm)' })
+      if (dtRaw != null && dtRaw !== '' && !normDT) details.push({ row: i + 1, colIndex: 4, colName: '首井开钻时间', cell: `${toCol(4)}${i + 1}`, reason: '日期时间格式错误(YYYY:MM:DD hh:mm:ss)' })
       items.push({
         projectName: pnRaw,
         workloadCount: wlRaw != null && wlRaw !== '' ? Number(wlRaw) : undefined,
@@ -277,7 +311,11 @@ export class TrackingController {
       })
     }
     if (details.length) return { ok: false, error: '数据校验失败', details }
-    return this.service.importFocus(Number(projectId), items)
+    try {
+      return await this.service.importFocus(Number(projectId), items)
+    } catch (e: any) {
+      return { ok: false, error: e?.message || '保存失败' }
+    }
   }
 
   @Delete('focus')

@@ -11,8 +11,8 @@ export class FocusProject {
   @ManyToOne(() => Project, p => p.id, { nullable: false })
   project: Project
 
-  @Column({ length: 100 })
-  contractNo: string
+  @Column({ length: 100, nullable: true })
+  contractNo?: string
 
   @Column({ length: 200, nullable: true })
   projectName?: string
@@ -23,7 +23,7 @@ export class FocusProject {
   @Column({ length: 200, nullable: true })
   realtimeProgress?: string
 
-  @Column({ length: 16, nullable: true })
+  @Column({ length: 19, nullable: true })
   firstWellSpudTime?: string
 
   @Column({ length: 10, nullable: true })

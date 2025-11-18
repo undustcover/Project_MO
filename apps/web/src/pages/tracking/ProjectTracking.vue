@@ -463,4 +463,5 @@ function scrollLegend(id: string, dir: number) {
 .popover-item { display:flex; align-items:center; justify-content:space-between; gap:12px }
 .popover-item .k { color:#64748b }
 .popover-item .v { color:#0f172a }
+.popover-item .k::after { content:'：'; margin:0 6px; color:#64748b }
 </style>

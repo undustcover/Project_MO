@@ -175,12 +175,16 @@ export class TrackingService {
     const rows = focus.map(f => {
       const r = f.contractNo ? byContract.get(f.contractNo) : (f.projectName ? byProjectName.get(f.projectName) : undefined)
       return {
-        contractNo: f.contractNo,
+        contractNo: (f.contractNo || r?.contractNo || ''),
         projectName: f.projectName || r?.projectName || '',
         region: r?.marketCountry || '',
         executor: r?.executor || '',
         rigNo: r?.teamNo || '',
         projectTerm: r?.contractStartDate && r?.contractEndDate ? `${r.contractStartDate} ~ ${r.contractEndDate}` : '',
+        contractAmountUSD: r?.contractAmountUSD ?? undefined,
+        contractStartDate: r?.contractStartDate ?? undefined,
+        contractEndDate: r?.contractEndDate ?? undefined,
+        ownerUnit: r?.ownerUnit ?? undefined,
         workloadCount: f.workloadCount ?? null,
         realtimeProgress: f.realtimeProgress || '',
         estimatedSpudDate: f.estimatedSpudDate || '',
@@ -200,27 +204,37 @@ export class TrackingService {
     const projectNameSet = new Set(recs.map(r => String(r.projectName || '').trim()).filter(Boolean))
     const missingNames: string[] = []
     const normalizeDt = (v: any) => {
+      if (typeof v === 'number') {
+        const d = new Date((v - 25569) * 86400 * 1000)
+        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0'); const hh = String(d.getHours()).padStart(2, '0'); const mm = String(d.getMinutes()).padStart(2, '0'); const ss = String(d.getSeconds()).padStart(2, '0')
+        return `${y}-${m}-${da} ${hh}:${mm}:${ss}`
+      }
       let s = String(v || '').trim()
       if (!s) return undefined
-      s = s.replace(/[:]/g, '-').replace(/^(.{10})-/, '$1 ')
-      const d = new Date(s)
-      if (isNaN(d.getTime())) return undefined
-      const y = d.getFullYear()
-      const m = String(d.getMonth() + 1).padStart(2, '0')
-      const da = String(d.getDate()).padStart(2, '0')
-      const hh = String(d.getHours()).padStart(2, '0')
-      const mm = String(d.getMinutes()).padStart(2, '0')
-      return `${y}-${m}-${da} ${hh}:${mm}`
+      const m = s.match(/^(\d{4})[:\-](\d{2})[:\-](\d{2})\s+(\d{2})[:\-](\d{2})(?::(\d{2}))?$/)
+      if (!m) return undefined
+      const [_, yy, MM, DD, hh, mm, ss] = m
+      return `${yy}-${MM}-${DD} ${hh}:${mm}:${ss || '00'}`
     }
     const normalizeDate = (v: any) => {
-      let s = String(v || '').trim()
+      if (v == null || v === '') return undefined
+      if (typeof v === 'number') {
+        const d = new Date((v - 25569) * 86400 * 1000)
+        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${da}`
+      }
+      let s = String(v).trim()
       if (!s) return undefined
+      if (/^\d+$/.test(s)) {
+        const num = Number(s)
+        const d = new Date((num - 25569) * 86400 * 1000)
+        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${da}`
+      }
       s = s.replace(/[.:/]/g, '-')
       const d = new Date(s)
       if (isNaN(d.getTime())) return undefined
-      const y = d.getFullYear()
-      const m = String(d.getMonth() + 1).padStart(2, '0')
-      const da = String(d.getDate()).padStart(2, '0')
+      const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0')
       return `${y}-${m}-${da}`
     }
     const cleaned: FocusProject[] = []
