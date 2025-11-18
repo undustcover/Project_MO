@@ -10,6 +10,14 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 011-1h12a1 1 0 011 1v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2z"/></svg>
         </a>
       </el-tooltip>
+      <el-upload v-if="rows.length" :action="focusWellsUploadUrl" :show-file-list="false" :on-success="onImportSuccess" :on-error="onImportError" accept=".xlsx,.xls" class="ml8">
+        <el-button type="primary">导入井口开钻</el-button>
+      </el-upload>
+      <el-tooltip v-if="rows.length" content="下载井口开钻模板" placement="top">
+        <a class="icon-btn ml8" :href="focusWellsTemplateUrl" download="focus_wells_template.xlsx" aria-label="下载井口开钻模板">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 011-1h12a1 1 0 011 1v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2z"/></svg>
+        </a>
+      </el-tooltip>
     </div>
     <el-row :gutter="12" class="mt12">
       <el-col :span="12">
@@ -74,13 +82,24 @@
             <el-table-column prop="projectTerm" label="项目期限" />
             <el-table-column label="开钻详情">
               <template #default="{ row }">
-                <el-popover trigger="click" placement="top" width="360">
+                <el-popover trigger="click" placement="top" width="420">
                   <template #reference>
                     <el-link type="primary">查看详情</el-link>
                   </template>
                   <div class="popover-list">
-                    <div class="popover-item"><span class="k">预计开钻时间</span><span class="v">{{ row.estimatedSpudDate }}</span></div>
-                    <div class="popover-item"><span class="k">首井开钻时间</span><span class="v">{{ row.firstWellSpudTime }}</span></div>
+                    <div class="popover-item"><span class="k">预计开钻时间</span><span class="v">{{ displayText(row.estimatedSpudDate) }}</span></div>
+                    <template v-if="row.firstWellSpudTime">
+                      <div class="popover-item">
+                        <span class="k">首井开钻时间</span>
+                        <span class="v">
+                          <template v-if="firstWellLine(row)">{{ firstWellLine(row) }}</template>
+                          <template v-else>{{ row.firstWellSpudTime }}</template>
+                        </span>
+                      </div>
+                    </template>
+                    <template v-for="w in otherWells(row)" :key="w.wellNo">
+                      <div class="popover-item"><span class="k">井号</span><span class="v">{{ `${w.wellNo}：${w.firstWellSpudTime || '未录入信息'}` }}</span></div>
+                    </template>
                   </div>
                 </el-popover>
               </template>
@@ -151,6 +170,16 @@ const rows = ref<any[]>([])
 const uploadUrl = ref('')
 const focusTemplateUrl = computed(() => {
   const u = new URL('/api/dashboard/tracking/focus/template', window.location.origin)
+  if (projectId.value) u.searchParams.set('projectId', String(projectId.value))
+  return u.toString()
+})
+const focusWellsTemplateUrl = computed(() => {
+  const u = new URL('/api/dashboard/tracking/focus/wells/template', window.location.origin)
+  if (projectId.value) u.searchParams.set('projectId', String(projectId.value))
+  return u.toString()
+})
+const focusWellsUploadUrl = computed(() => {
+  const u = new URL('/api/dashboard/tracking/focus/wells/import', window.location.origin)
   if (projectId.value) u.searchParams.set('projectId', String(projectId.value))
   return u.toString()
 })
@@ -267,6 +296,17 @@ function onResize() { regionChart && regionChart.resize(); executorChart && exec
 
 function displayText(v: any) { const s = String(v ?? '').trim(); return s ? s : '未录入信息' }
 function displayAmount(v: any) { const n = v != null && v !== '' ? Number(v) : NaN; return isNaN(n) ? '未录入信息' : new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) }
+function firstWellLine(row: any) {
+  const fw = String(row.firstWellSpudTime || '').trim()
+  if (!fw) return ''
+  const matched = (row.wells || []).find((w: any) => String(w.firstWellSpudTime || '').trim() === fw)
+  return matched ? `${matched.wellNo}：${fw}` : ''
+}
+function otherWells(row: any) {
+  const fw = String(row.firstWellSpudTime || '').trim()
+  const wells = Array.isArray(row.wells) ? row.wells : []
+  return wells.filter((w: any) => String(w.firstWellSpudTime || '').trim() !== fw)
+}
 </script>
 
 <style scoped>

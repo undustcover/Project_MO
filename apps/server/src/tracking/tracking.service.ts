@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { TrackingRecord } from './entities/tracking-record.entity'
 import { FocusProject } from './entities/focus-project.entity'
+import { FocusWellSpud } from './entities/focus-well-spud.entity'
 import { Project } from '../projects/entities/project.entity'
 
 @Injectable()
@@ -10,7 +11,8 @@ export class TrackingService {
   constructor(
     @InjectRepository(TrackingRecord) private repo: Repository<TrackingRecord>,
     @InjectRepository(Project) private projects: Repository<Project>,
-    @InjectRepository(FocusProject) private focusRepo: Repository<FocusProject>
+    @InjectRepository(FocusProject) private focusRepo: Repository<FocusProject>,
+    @InjectRepository(FocusWellSpud) private focusWellRepo: Repository<FocusWellSpud>
   ) {}
 
   async import(projectId: number, items: Array<Partial<TrackingRecord>>) {
@@ -172,6 +174,15 @@ export class TrackingService {
       if (kc) byContract.set(kc, r)
       if (kp) byProjectName.set(kp, r)
     }
+    const wells = await this.focusWellRepo.find({ where: { project: { id: projectId } as any } })
+    const wellsByPN = new Map<string, Array<{ wellNo: string; estimatedSpudDate?: string; firstWellSpudTime?: string }>>()
+    for (const w of wells) {
+      const key = String(w.projectName || '')
+      if (!key) continue
+      const arr = wellsByPN.get(key) || []
+      arr.push({ wellNo: w.wellNo, estimatedSpudDate: w.estimatedSpudDate, firstWellSpudTime: w.firstWellSpudTime })
+      wellsByPN.set(key, arr)
+    }
     const rows = focus.map(f => {
       const r = f.contractNo ? byContract.get(f.contractNo) : (f.projectName ? byProjectName.get(f.projectName) : undefined)
       return {
@@ -189,6 +200,7 @@ export class TrackingService {
         realtimeProgress: f.realtimeProgress || '',
         estimatedSpudDate: f.estimatedSpudDate || '',
         firstWellSpudTime: f.firstWellSpudTime || '',
+        wells: wellsByPN.get(String(f.projectName || '')) || [],
         focusItems: f.focusItems || '',
         workValueDone: f.workValueDone || '',
         expectedWorkThisYear: f.expectedWorkThisYear || ''
@@ -259,6 +271,55 @@ export class TrackingService {
       const pns = cleaned.map(c => c.projectName).filter(Boolean) as string[]
       if (pns.length) await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND projectName IN (:...pns)', { pid: projectId, pns }).execute()
       await this.focusRepo.save(cleaned)
+    }
+    return { ok: true, count: cleaned.length }
+  }
+
+  async importFocusWells(projectId: number, items: Array<{ projectName: string; wellNo: string; firstWellSpudTime?: string }>) {
+    const project = await this.projects.findOne({ where: { id: projectId } })
+    if (!project) return { ok: false, error: '项目不存在' }
+    const focus = await this.focusRepo.find({ where: { project: { id: projectId } as any } })
+    const focusPN = new Set(focus.map(f => String(f.projectName || '').trim()).filter(Boolean))
+    const invalid: string[] = []
+    const cleaned: FocusWellSpud[] = []
+    const findFocus = (pn: string) => focus.find(f => String(f.projectName || '') === pn)
+    for (const it of items) {
+      const pn = String(it.projectName || '').trim()
+      const wn = String(it.wellNo || '').trim()
+      if (!pn || !wn) { invalid.push(`${pn || '(空项目名称)'}-${wn || '(空井号)'}`); continue }
+      if (!focusPN.has(pn)) { invalid.push(`${pn}`); continue }
+      const entity = this.focusWellRepo.create({ project, focus: findFocus(pn), projectName: pn, wellNo: wn, firstWellSpudTime: it.firstWellSpudTime })
+      cleaned.push(entity)
+    }
+    if (invalid.length) return { ok: false, error: `项目名称或井号不一致：${invalid.join(', ')}` }
+    await this.focusWellRepo.createQueryBuilder().delete().where('projectId = :pid', { pid: projectId }).execute()
+    if (cleaned.length) await this.focusWellRepo.save(cleaned)
+
+    const toMs = (s?: string | null) => {
+      if (!s) return NaN
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/)
+      if (!m) return NaN
+      const yy = Number(m[1]), MM = Number(m[2]) - 1, DD = Number(m[3])
+      const hh = Number(m[4] || '0'), mm = Number(m[5] || '0'), ss = Number(m[6] || '0')
+      return Date.UTC(yy, MM, DD, hh, mm, ss)
+    }
+    const earliestByPN = new Map<string, string | null>()
+    for (const c of cleaned) {
+      if (!c.firstWellSpudTime) continue
+      const key = c.projectName
+      const prev = earliestByPN.get(key)
+      if (!prev) { earliestByPN.set(key, c.firstWellSpudTime) }
+      else {
+        const a = toMs(c.firstWellSpudTime)
+        const b = toMs(prev)
+        if (!isNaN(a) && !isNaN(b) && a < b) earliestByPN.set(key, c.firstWellSpudTime)
+      }
+    }
+    for (const fItem of focus) {
+      const pn = String(fItem.projectName || '')
+      if (!pn) continue
+      const earliest = earliestByPN.get(pn) || null
+      await this.focusRepo.createQueryBuilder().update(FocusProject).set({ firstWellSpudTime: earliest as any }).where('projectId = :pid AND projectName = :pn', { pid: projectId, pn }).execute()
     }
     return { ok: true, count: cleaned.length }
   }

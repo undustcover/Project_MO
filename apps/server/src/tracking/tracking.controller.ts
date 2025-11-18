@@ -318,6 +318,70 @@ export class TrackingController {
     }
   }
 
+  @Get('focus/wells/template')
+  async focusWellsTemplate(@Res() res: Response, @Query('projectId') projectId?: string) {
+    const header = ['项目名称', '井号', '开钻时间']
+    const wb = XLSX.utils.book_new()
+    const rows: any[] = [header]
+    if (projectId) {
+      const data = await this.service.listFocus(Number(projectId))
+      for (const r of (data.rows || [])) {
+        const name = String(r.projectName || '').trim()
+        if (!name) continue
+        rows.push([name, '', ''])
+      }
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows)
+    XLSX.utils.book_append_sheet(wb, ws, '模板')
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer
+    res.setHeader('Cache-Control', 'no-cache')
+    res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.attachment('focus_wells_template.xlsx')
+    res.send(buf)
+  }
+
+  @Post('focus/wells/import')
+  @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
+  async importFocusWells(@UploadedFile() file: Express.Multer.File, @Query('projectId') projectId: string) {
+    if (!file || !file.buffer) return { ok: false, error: '未收到文件' }
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const rows: any[] = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+    const header = rows[0] || []
+    const expect = ['项目名称', '井号', '开钻时间']
+    const invalidHeader = expect.filter((h, i) => String(header[i] || '') !== h)
+    if (invalidHeader.length) return { ok: false, error: `列校验失败，请按模板列顺序：${expect.join(',')}` }
+    const toISODateTime = (val: any) => {
+      if (val == null || val === '') return undefined
+      if (typeof val === 'number') {
+        const ms = Math.round((val - 25569) * 86400 * 1000)
+        const d = new Date(ms)
+        const y = d.getUTCFullYear(); const m = String(d.getUTCMonth() + 1).padStart(2, '0'); const da = String(d.getUTCDate()).padStart(2, '0'); const hh = String(d.getUTCHours()).padStart(2, '0'); const mm = String(d.getUTCMinutes()).padStart(2, '0'); const ss = String(d.getUTCSeconds()).padStart(2, '0')
+        return `${y}-${m}-${da} ${hh}:${mm}:${ss}`
+      }
+      let s = String(val).trim(); if (!s) return undefined
+      const m = s.match(/^(\d{4})[:\-](\d{2})[:\-](\d{2})(?:\s+(\d{2})[:\-](\d{2})(?::(\d{2}))?)?$/)
+      if (!m) return undefined
+      const [_, yy, MM, DD, hh, mm, ss] = m
+      return `${yy}-${MM}-${DD}${hh ? ` ${hh}:${mm}:${ss || '00'}` : ''}`
+    }
+    const items: Array<{ projectName: string; wellNo: string; estimatedSpudDate?: string; firstWellSpudTime?: string }> = []
+    const details: any[] = []
+    const toCol = (idx: number) => { const n = idx + 1; let s = ''; let x = n; while (x > 0) { const r = (x - 1) % 26; s = String.fromCharCode(65 + r) + s; x = Math.floor((x - 1) / 26) } return s }
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i]
+      if (!r || r.length === 0) continue
+      const projectName = String(r[0] || '').trim()
+      const wellNo = String(r[1] || '').trim()
+      const dt = toISODateTime(r[2])
+      if (!projectName) details.push({ row: i + 1, colIndex: 0, colName: '项目名称', cell: `${toCol(0)}${i + 1}`, reason: '项目名称不能为空' })
+      if (!wellNo) details.push({ row: i + 1, colIndex: 1, colName: '井号', cell: `${toCol(1)}${i + 1}`, reason: '井号不能为空' })
+      if (r[2] && !dt) details.push({ row: i + 1, colIndex: 2, colName: '开钻时间', cell: `${toCol(2)}${i + 1}`, reason: '日期时间格式错误(YYYY:MM:DD hh:mm:ss)' })
+      items.push({ projectName, wellNo, firstWellSpudTime: dt })
+    }
+    if (details.length) return { ok: false, error: '数据校验失败', details }
+    return this.service.importFocusWells(Number(projectId), items)
+  }
   @Delete('focus')
   async deleteFocus(
     @Query('projectId') projectId: string,
