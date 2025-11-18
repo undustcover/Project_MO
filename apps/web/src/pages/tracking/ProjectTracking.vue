@@ -6,7 +6,7 @@
         <el-button type="success">导入追踪表</el-button>
       </el-upload>
       <el-tooltip content="下载模板" placement="top">
-        <a class="icon-btn ml8" href="/api/dashboard/tracking/template" download aria-label="下载模板">
+        <a class="icon-btn ml8" href="/api/dashboard/tracking/template" download="tracking_template.xlsx" aria-label="下载模板">
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 011-1h12a1 1 0 011 1v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2z"/></svg>
         </a>
       </el-tooltip>
@@ -150,25 +150,80 @@
           <el-table :data="tableRows" size="small" border height="640">
             <el-table-column prop="marketCountry" label="市场国别" />
             <el-table-column prop="indexNo" label="序号" />
-            <el-table-column prop="teamNo" label="队伍编号（国工编号）" />
-            <el-table-column prop="teamNewNo" label="队伍新编号（中技服针编号）" />
-            <el-table-column prop="rigNo" label="钻机编号（集团公司编号）" />
-            <el-table-column prop="rigModel" label="钻机型号" />
-            <el-table-column prop="manufacturer" label="生产厂家" />
-            <el-table-column prop="productionDate" label="投产日期" />
-            <el-table-column prop="executor" label="执行主体" />
-            <el-table-column prop="contractNo" label="合同编号" />
-            <el-table-column prop="contractAmountUSD" label="合同金额（万美元）" />
-            <el-table-column prop="contractStartDate" label="合同开始日期" />
-            <el-table-column prop="contractEndDate" label="合同结束日期" />
-            <el-table-column prop="ownerUnit" label="业主单位" />
-            <el-table-column prop="teamStatus" label="井队动态" />
-            <el-table-column prop="constructionStatus" label="施工情况" />
-            <el-table-column prop="nextMarketPlan" label="下轮市场计划" />
-            <el-table-column prop="remark" label="备注说明" />
-            <el-table-column label="操作" width="120">
+            <el-table-column label="队伍编号">
               <template #default="{ row }">
-                <el-button size="small" type="primary" @click="markFocus(row.contractNo)" :disabled="!row.contractNo">设为重点</el-button>
+                <el-popover trigger="click" placement="top" width="420">
+                  <template #reference>
+                    <el-link type="primary">{{ row.teamNo }}</el-link>
+                  </template>
+                  <div class="popover-list">
+                    <div class="popover-item"><span class="k">队伍新编号</span><span class="v">{{ row.teamNewNo }}</span></div>
+                    <div class="popover-item"><span class="k">钻机编号</span><span class="v">{{ row.rigNo }}</span></div>
+                    <div class="popover-item"><span class="k">钻机型号</span><span class="v">{{ row.rigModel }}</span></div>
+                    <div class="popover-item"><span class="k">生产厂家</span><span class="v">{{ row.manufacturer }}</span></div>
+                    <div class="popover-item"><span class="k">投产日期</span><span class="v">{{ row.productionDate }}</span></div>
+                  </div>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column label="执行主体">
+              <template #default="{ row }">
+                <el-popover trigger="click" placement="top" width="420">
+                  <template #reference>
+                    <el-link type="primary">{{ row.executor }}</el-link>
+                  </template>
+                  <div class="popover-list">
+                    <div class="popover-item"><span class="k">联络人1</span><span class="v">{{ row.contact1 }}</span></div>
+                    <div class="popover-item"><span class="k">联络人2</span><span class="v">{{ row.contact2 }}</span></div>
+                  </div>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column label="项目名称">
+              <template #default="{ row }">
+                <el-popover trigger="click" placement="top" width="420">
+                  <template #reference>
+                    <el-link type="primary">{{ row.projectName }}</el-link>
+                  </template>
+                  <div class="popover-list">
+                    <div class="popover-item"><span class="k">项目昵称</span><span class="v">{{ row.projectNickname }}</span></div>
+                    <div class="popover-item"><span class="k">合同编号</span><span class="v">{{ row.contractNo }}</span></div>
+                    <div class="popover-item"><span class="k">合同金额(万美元)</span><span class="v">{{ formatMoney(row.contractAmountUSD) }}</span></div>
+                    <div class="popover-item"><span class="k">合同开始日期</span><span class="v">{{ row.contractStartDate }}</span></div>
+                    <div class="popover-item"><span class="k">合同结束日期</span><span class="v">{{ row.contractEndDate }}</span></div>
+                    <div class="popover-item"><span class="k">业主单位</span><span class="v">{{ row.ownerUnit }}</span></div>
+                  </div>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column label="井队动态">
+              <template #default="{ row }">
+                <el-popover trigger="click" placement="top" width="420">
+                  <template #reference>
+                    <el-tag size="small">{{ row.teamStatus }}</el-tag>
+                  </template>
+                  <div class="popover-list">
+                    <div class="popover-item"><span class="k">施工情况</span><span class="v">{{ row.constructionStatus }}</span></div>
+                    <div class="popover-item"><span class="k">下轮市场</span><span class="v">{{ row.nextMarketPlan }}</span></div>
+                    <div class="popover-item"><span class="k">备注说明</span><span class="v">{{ row.remark }}</span></div>
+                  </div>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="200">
+              <template #default="{ row }">
+                <template v-if="isFocused(row)">
+                  <el-button size="small" type="success" disabled>重点关注</el-button>
+                  <el-button size="small" type="danger" class="ml8" @click="unFocus(row)">删除重点</el-button>
+                </template>
+                <template v-else-if="!row.projectName">
+                  <el-button size="small" disabled>设为重点</el-button>
+                  <el-button size="small" type="danger" class="ml8" disabled>删除重点</el-button>
+                </template>
+                <template v-else>
+                  <el-button size="small" type="primary" @click="markFocus(row)">设为重点</el-button>
+                  <el-button size="small" type="danger" class="ml8" disabled>删除重点</el-button>
+                </template>
               </template>
             </el-table-column>
           </el-table>
@@ -182,7 +237,7 @@
 import * as echarts from 'echarts'
 import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getProjects, getTrackingSummary, getTrackingTable, setTrackingFocus } from '../../services/api'
+import { getProjects, getTrackingSummary, getTrackingTable, setTrackingFocus, getTrackingFocusList, deleteTrackingFocus } from '../../services/api'
 import { useRouter } from 'vue-router'
 
 const projects = ref<any[]>([])
@@ -205,6 +260,8 @@ let ageChart: echarts.ECharts | null = null
 const summary = ref<any>(null)
 const expiringContracts = ref<any[]>([])
 const tableRows = ref<any[]>([])
+const focusedByName = ref<Set<string>>(new Set())
+const focusedByContract = ref<Set<string>>(new Set())
 const usageOuterLegend = ref<Array<{ name: string; value: number; color: string }>>([])
 const usageInnerLegend = ref<Array<{ name: string; value: number; color: string }>>([])
 const executorLegend = ref<Array<{ name: string; value: number; color: string }>>([])
@@ -233,6 +290,12 @@ async function load() {
   const table = await getTrackingTable(projectId.value)
   tableRows.value = table.rows || []
   expiringContracts.value = summary.value?.expiringContracts || []
+  const fl = await getTrackingFocusList(projectId.value)
+  const names = new Set<string>()
+  const cons = new Set<string>()
+  for (const r of fl.rows || []) { const pn = String(r.projectName || '').trim(); const cn = String(r.contractNo || '').trim(); if (pn) names.add(pn); if (cn) cons.add(cn) }
+  focusedByName.value = names
+  focusedByContract.value = cons
   await nextTick()
   renderUsage()
   renderExecutor()
@@ -242,18 +305,63 @@ async function load() {
   renderAge()
 }
 
-function onImportSuccess() { ElMessage.success('导入成功'); load() }
-function onImportError() { ElMessage.error('导入失败') }
+function onImportSuccess(resp: any) {
+  let r = resp
+  try { if (typeof resp === 'string') r = JSON.parse(resp) } catch {}
+  if (r && r.ok) { ElMessage.success('导入成功'); load() }
+  else {
+    const msg = r?.error || '导入失败'
+    const det = Array.isArray(r?.details) ? r.details.slice(0, 10).map((d: any) => `第${d.row}行${d.colName}(${d.cell})：${d.reason}`).join('；') : ''
+    ElMessage.error(det ? `${msg}：${det}` : msg)
+  }
+}
+function onImportError(err: any) {
+  let msg = '导入失败'
+  try { const r = JSON.parse(err?.message || '{}'); msg = r?.error || msg } catch {}
+  ElMessage.error(msg)
+}
+
+function formatMoney(v: any) { const num = Number(v || 0); return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) }
 const router = useRouter()
 function openFocus() {
   const pid = projectId.value ? String(projectId.value) : ''
   router.push({ path: '/tracking/focus', query: pid ? { projectId: pid } : {} })
 }
-async function markFocus(contractNo: string) {
-  if (!projectId.value || !contractNo) return
-  const ok = await setTrackingFocus(projectId.value, contractNo)
+async function markFocus(row: any) {
+  if (!projectId.value) return
+  const payload: any = {}
+  if (row?.projectName) payload.projectName = String(row.projectName)
+  else if (row?.contractNo) payload.contractNo = String(row.contractNo)
+  else return
+  const ok = await setTrackingFocus(projectId.value, payload)
   if (ok) ElMessage.success('已设为重点关注项目')
-  else ElMessage.error('设为重点失败：请检查合同编号是否已录入')
+  else ElMessage.error('设为重点失败：请检查项目名称或合同编号是否已录入')
+  if (ok) {
+    if (payload.projectName) focusedByName.value.add(payload.projectName)
+    if (payload.contractNo) focusedByContract.value.add(payload.contractNo)
+  }
+}
+
+function isFocused(row: any) {
+  const pn = String(row?.projectName || '').trim()
+  const cn = String(row?.contractNo || '').trim()
+  return (pn && focusedByName.value.has(pn)) || (cn && focusedByContract.value.has(cn))
+}
+
+async function unFocus(row: any) {
+  if (!projectId.value) return
+  const payload: any = {}
+  const pn = String(row?.projectName || '').trim()
+  const cn = String(row?.contractNo || '').trim()
+  if (pn) payload.projectName = pn; else if (cn) payload.contractNo = cn; else return
+  const ok = await deleteTrackingFocus(projectId.value, payload)
+  if (ok) {
+    if (pn) focusedByName.value.delete(pn)
+    if (cn) focusedByContract.value.delete(cn)
+    ElMessage.success('已取消重点关注')
+  } else {
+    ElMessage.error('取消重点失败')
+  }
 }
 
 function renderUsage() {
@@ -351,4 +459,8 @@ function scrollLegend(id: string, dir: number) {
 .legend-item { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; background:#f1f5f9; color:#334155; font-size:12px }
 .legend-dot { width:10px; height:10px; border-radius:50% }
 .legend-btn { border:1px solid #e2e8f0; background:#fff; color:#334155; border-radius:6px; padding:2px 8px; cursor:pointer }
+.popover-list { display:flex; flex-direction:column; gap:8px }
+.popover-item { display:flex; align-items:center; justify-content:space-between; gap:12px }
+.popover-item .k { color:#64748b }
+.popover-item .v { color:#0f172a }
 </style>

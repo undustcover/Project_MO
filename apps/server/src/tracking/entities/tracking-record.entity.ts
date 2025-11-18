@@ -36,6 +36,12 @@ export class TrackingRecord {
   @Column({ length: 100, nullable: true })
   executor?: string
 
+  @Column({ length: 200, nullable: true })
+  projectName?: string
+
+  @Column({ length: 200, nullable: true })
+  projectNickname?: string
+
   @Column({ length: 100, nullable: true })
   contractNo?: string
 
@@ -62,4 +68,10 @@ export class TrackingRecord {
 
   @Column({ length: 500, nullable: true })
   remark?: string
+
+  @Column({ length: 200, nullable: true })
+  contact1?: string
+
+  @Column({ length: 200, nullable: true })
+  contact2?: string
 }

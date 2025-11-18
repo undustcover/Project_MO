@@ -223,10 +223,11 @@ export async function getTrackingTable(projectId: number) {
   return res.json()
 }
 
-export async function setTrackingFocus(projectId: number, contractNo: string) {
+export async function setTrackingFocus(projectId: number, payload: { contractNo?: string; projectName?: string }) {
   const u = new URL(`/api/dashboard/tracking/focus/set`, window.location.origin)
   u.searchParams.set('projectId', String(projectId))
-  u.searchParams.set('contractNo', contractNo)
+  if (payload.contractNo) u.searchParams.set('contractNo', payload.contractNo)
+  if (payload.projectName) u.searchParams.set('projectName', payload.projectName)
   const res = await fetch(u.toString(), { method: 'POST' })
   const d = await res.json().catch(() => ({ ok: res.ok }))
   return !!(d?.ok)
@@ -238,4 +239,14 @@ export async function getTrackingFocusList(projectId: number) {
   const res = await fetch(u.toString())
   if (!res.ok) return { rows: [] }
   return res.json()
+}
+
+export async function deleteTrackingFocus(projectId: number, payload: { contractNo?: string; projectName?: string }) {
+  const u = new URL(`/api/dashboard/tracking/focus`, window.location.origin)
+  u.searchParams.set('projectId', String(projectId))
+  if (payload.contractNo) u.searchParams.set('contractNo', payload.contractNo)
+  if (payload.projectName) u.searchParams.set('projectName', payload.projectName)
+  const res = await fetch(u.toString(), { method: 'DELETE' })
+  const d = await res.json().catch(() => ({ ok: res.ok }))
+  return !!(d?.ok)
 }

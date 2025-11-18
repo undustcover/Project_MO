@@ -125,15 +125,38 @@ export class TrackingService {
     }
   }
 
-  async setFocus(projectId: number, contractNo: string) {
+  async setFocus(projectId: number, contractNo?: string, projectName?: string) {
     const project = await this.projects.findOne({ where: { id: projectId } })
     if (!project) return { ok: false, error: '项目不存在' }
-    const exists = await this.repo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
-    if (!exists) return { ok: false, error: `合同编号未录入：${contractNo}` }
-    const dup = await this.focusRepo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
-    if (dup) return { ok: true }
-    await this.focusRepo.save(this.focusRepo.create({ project, contractNo }))
+    let record: TrackingRecord | null = null
+    if (projectName) {
+      record = await this.repo.findOne({ where: { project: { id: projectId } as any, projectName } as any })
+      if (!record) return { ok: false, error: `项目名称未录入：${projectName}` }
+      const dup2 = await this.focusRepo.findOne({ where: { project: { id: projectId } as any, projectName } as any })
+      if (dup2) return { ok: true }
+      await this.focusRepo.save(this.focusRepo.create({ project, projectName, contractNo: record.contractNo }))
+    } else if (contractNo) {
+      record = await this.repo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
+      if (!record) return { ok: false, error: `合同编号未录入：${contractNo}` }
+      const dup = await this.focusRepo.findOne({ where: { project: { id: projectId } as any, contractNo } as any })
+      if (dup) return { ok: true }
+      await this.focusRepo.save(this.focusRepo.create({ project, contractNo, projectName: record.projectName }))
+    } else {
+      return { ok: false, error: '缺少参数：需提供合同编号或项目名称' }
+    }
     return { ok: true }
+  }
+
+  async removeFocus(projectId: number, contractNo?: string, projectName?: string) {
+    if (contractNo) {
+      await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND contractNo = :cn', { pid: projectId, cn: contractNo }).execute()
+      return { ok: true }
+    }
+    if (projectName) {
+      await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND projectName = :pn', { pid: projectId, pn: projectName }).execute()
+      return { ok: true }
+    }
+    return { ok: false, error: '缺少参数：需提供合同编号或项目名称' }
   }
 
   async listFocus(projectId: number) {
@@ -141,19 +164,26 @@ export class TrackingService {
     if (!project) return { rows: [] }
     const focus = await this.focusRepo.find({ where: { project: { id: projectId } as any } })
     const byContract = new Map<string, TrackingRecord | undefined>()
+    const byProjectName = new Map<string, TrackingRecord | undefined>()
     const recs = await this.repo.find({ where: { project: { id: projectId } as any } })
-    for (const r of recs) { const k = String(r.contractNo || ''); if (k) byContract.set(k, r) }
+    for (const r of recs) {
+      const kc = String(r.contractNo || '')
+      const kp = String(r.projectName || '')
+      if (kc) byContract.set(kc, r)
+      if (kp) byProjectName.set(kp, r)
+    }
     const rows = focus.map(f => {
-      const r = byContract.get(f.contractNo)
+      const r = f.contractNo ? byContract.get(f.contractNo) : (f.projectName ? byProjectName.get(f.projectName) : undefined)
       return {
         contractNo: f.contractNo,
+        projectName: f.projectName || r?.projectName || '',
         region: r?.marketCountry || '',
         executor: r?.executor || '',
         rigNo: r?.teamNo || '',
         projectTerm: r?.contractStartDate && r?.contractEndDate ? `${r.contractStartDate} ~ ${r.contractEndDate}` : '',
-        projectName: f.projectName || '',
         workloadCount: f.workloadCount ?? null,
         realtimeProgress: f.realtimeProgress || '',
+        estimatedSpudDate: f.estimatedSpudDate || '',
         firstWellSpudTime: f.firstWellSpudTime || '',
         focusItems: f.focusItems || '',
         workValueDone: f.workValueDone || '',
@@ -166,8 +196,9 @@ export class TrackingService {
   async importFocus(projectId: number, items: Array<any>) {
     const project = await this.projects.findOne({ where: { id: projectId } })
     if (!project) return { ok: false, error: '项目不存在' }
-    const contractSet = new Set((await this.repo.find({ where: { project: { id: projectId } as any } })).map(r => String(r.contractNo || '')))
-    const missing: string[] = []
+    const recs = await this.repo.find({ where: { project: { id: projectId } as any } })
+    const projectNameSet = new Set(recs.map(r => String(r.projectName || '').trim()).filter(Boolean))
+    const missingNames: string[] = []
     const normalizeDt = (v: any) => {
       let s = String(v || '').trim()
       if (!s) return undefined
@@ -181,27 +212,38 @@ export class TrackingService {
       const mm = String(d.getMinutes()).padStart(2, '0')
       return `${y}-${m}-${da} ${hh}:${mm}`
     }
+    const normalizeDate = (v: any) => {
+      let s = String(v || '').trim()
+      if (!s) return undefined
+      s = s.replace(/[.:/]/g, '-')
+      const d = new Date(s)
+      if (isNaN(d.getTime())) return undefined
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const da = String(d.getDate()).padStart(2, '0')
+      return `${y}-${m}-${da}`
+    }
     const cleaned: FocusProject[] = []
     for (const it of items) {
-      const cn = String(it.contractNo || '').trim()
-      if (!cn || !contractSet.has(cn)) { missing.push(cn || '(空合同编号)'); continue }
+      const pn = String(it.projectName || '').trim()
+      if (!pn || !projectNameSet.has(pn)) { missingNames.push(pn || '(空项目名称)'); continue }
       const fp = this.focusRepo.create({
         project,
-        contractNo: cn,
-        projectName: String(it.projectName || '').trim() || undefined,
+        projectName: pn || undefined,
         workloadCount: it.workloadCount != null && it.workloadCount !== '' ? Number(it.workloadCount) : undefined,
         realtimeProgress: String(it.realtimeProgress || '').trim() || undefined,
         firstWellSpudTime: normalizeDt(it.firstWellSpudTime) || undefined,
+        estimatedSpudDate: normalizeDate(it.estimatedSpudDate) || undefined,
         focusItems: String(it.focusItems || '').trim() || undefined,
         workValueDone: String(it.workValueDone || '').trim() || undefined,
         expectedWorkThisYear: String(it.expectedWorkThisYear || '').trim() || undefined
       })
       cleaned.push(fp)
     }
-    if (missing.length) return { ok: false, error: `合同编号未录入：${missing.join(', ')}` }
+    if (missingNames.length) return { ok: false, error: `项目名称未录入：${missingNames.join(', ')}` }
     if (cleaned.length) {
-      const cns = cleaned.map(c => c.contractNo)
-      await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND contractNo IN (:...cns)', { pid: projectId, cns }).execute()
+      const pns = cleaned.map(c => c.projectName).filter(Boolean) as string[]
+      if (pns.length) await this.focusRepo.createQueryBuilder().delete().where('projectId = :pid AND projectName IN (:...pns)', { pid: projectId, pns }).execute()
       await this.focusRepo.save(cleaned)
     }
     return { ok: true, count: cleaned.length }

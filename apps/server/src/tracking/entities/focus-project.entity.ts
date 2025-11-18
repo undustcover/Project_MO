@@ -3,6 +3,7 @@ import { Project } from '../../projects/entities/project.entity'
 
 @Entity('tracking_focus')
 @Unique(['project', 'contractNo'])
+@Unique(['project', 'projectName'])
 export class FocusProject {
   @PrimaryGeneratedColumn()
   id: number
@@ -24,6 +25,9 @@ export class FocusProject {
 
   @Column({ length: 16, nullable: true })
   firstWellSpudTime?: string
+
+  @Column({ length: 10, nullable: true })
+  estimatedSpudDate?: string
 
   @Column({ length: 500, nullable: true })
   focusItems?: string
